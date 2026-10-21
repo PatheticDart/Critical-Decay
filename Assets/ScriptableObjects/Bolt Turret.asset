@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 236c7f50e8f0df0449679b2c7b03a281, type: 3}
+  m_Name: Bolt Turret
+  m_EditorClassIdentifier: Assembly-CSharp::ModuleScriptableObject
+  moduleName: Bolt Turret
+  modulePrefab: {fileID: 2599133528229280744, guid: 8cee6f33af288f746a0e52156b21acae, type: 3}
+  moduleIcon: {fileID: 2694603551003506812, guid: f81fccd548194d64b84ea6b246cfae25, type: 3}
+  costType: 1
+  buildCost: 20
+  energyDrain: 20
+  requiredTechKey: BoltAcquisition
+  isRefinery: 0
+  isObservatory: 0

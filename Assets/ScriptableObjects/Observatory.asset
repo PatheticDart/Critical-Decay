@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 236c7f50e8f0df0449679b2c7b03a281, type: 3}
+  m_Name: Observatory
+  m_EditorClassIdentifier: Assembly-CSharp::ModuleScriptableObject
+  moduleName: Observatory
+  modulePrefab: {fileID: 7072490584638059716, guid: 34878aab70234cd498b0adecaff32735, type: 3}
+  moduleIcon: {fileID: 8053095546430546071, guid: 1ffc470493881e54eb53745e75504cb4, type: 3}
+  costType: 1
+  buildCost: 50
+  energyDrain: 20
+  requiredTechKey: 
+  isRefinery: 0
+  isObservatory: 1

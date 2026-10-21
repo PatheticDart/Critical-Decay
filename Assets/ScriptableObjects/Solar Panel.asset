@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 236c7f50e8f0df0449679b2c7b03a281, type: 3}
+  m_Name: Solar Panel
+  m_EditorClassIdentifier: Assembly-CSharp::ModuleScriptableObject
+  moduleName: Solar Panel
+  modulePrefab: {fileID: 4389664301654901271, guid: 6ab47d5613bb9694c9ec45454cd49b51, type: 3}
+  moduleIcon: {fileID: 656558314906694029, guid: 4858f8c14525d5f41ac30ec2b3b6a6a1, type: 3}
+  costType: 1
+  buildCost: 20
+  energyDrain: 0
+  requiredTechKey: EnergyProduction
+  isRefinery: 0
+  isObservatory: 0
