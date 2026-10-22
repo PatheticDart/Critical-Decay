@@ -17,13 +17,11 @@ public class TurretTargetingLogic : MonoBehaviour
 
     private void Awake()
     {
-        // Cache reference to TurretLogic on the same GameObject
         turretLogic = GetComponent<TurretLogic>();
     }
 
     private void Update()
     {
-        // 1. If target is destroyed, inactive, or goes out of range, clear it
         if (currentTarget != null)
         {
             if (!currentTarget.gameObject.activeInHierarchy || IsOutOfRange(currentTarget.position))
@@ -32,7 +30,6 @@ public class TurretTargetingLogic : MonoBehaviour
             }
         }
 
-        // 2. Search for a target on a throttled interval
         if (Time.time >= nextSearchTime)
         {
             nextSearchTime = Time.time + targetSearchInterval;
@@ -74,7 +71,6 @@ public class TurretTargetingLogic : MonoBehaviour
     {
         currentTarget = newTarget;
 
-        // Assign the target directly to TurretLogic
         if (turretLogic != null)
         {
             turretLogic.SetTarget(newTarget);

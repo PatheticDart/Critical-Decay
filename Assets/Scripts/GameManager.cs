@@ -34,8 +34,12 @@ public class GameManager : MonoBehaviour
             gameOverPanel.SetActive(true);
         }
 
-        // Freeze time when game over occurs
         Time.timeScale = 0f;
+    }
+
+    public void StartGame()
+    {
+        SceneManager.LoadScene(1);
     }
 
     public void RestartGame()
@@ -47,6 +51,11 @@ public class GameManager : MonoBehaviour
     public void MainMenu()
     {
         Time.timeScale = 1f;
-        SceneManager.LoadScene(0); // Load Main Menu scene
+        SceneManager.LoadScene(0);
+    }
+
+    public void QuitGame()
+    {
+        Application.Quit();
     }
 }

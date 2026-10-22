@@ -83,7 +83,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 1
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 7311577504204938024, guid: 40d6984cb4e1e564eab3d1665a95c9b4, type: 3}
+  m_Sprite: {fileID: -7723007277413958627, guid: 6bb8d3c1dff7b7a4ca49c38c6585e443, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -113,7 +113,7 @@ MonoBehaviour:
   range: 10
   coneAngle: 90
   burstInterval: 1
-  fireRate: 0.1
+  fireRate: 0
   shotCount: 5
   projectile: {fileID: 3431092495525861856, guid: 0bcc4bf6a3e44df45b1825ec3dbe1fb6, type: 3}
   projectileSpeed: 10
@@ -250,3 +250,6 @@ MonoBehaviour:
   hitRadius: 0.5
   currentLevel: 1
   explosionPrefab: {fileID: 0}
+  currentHealth: 0
+  deathSFX: {fileID: 0}
+  deathSFXVolume: 1

@@ -8,6 +8,7 @@ public class ModuleActionPanel : MonoBehaviour
     [SerializeField] private TextMeshProUGUI moduleNameText;
     [SerializeField] private TextMeshProUGUI healthText;
     [SerializeField] private TextMeshProUGUI repairCostText;
+    [SerializeField] private TextMeshProUGUI upgradeCostText;
 
     [Header("Action Buttons")]
     [SerializeField] private Button upgradeButton;
@@ -55,13 +56,41 @@ public class ModuleActionPanel : MonoBehaviour
             repairButton.onClick.AddListener(() => OnRepairClicked(finalRepairCost));
         }
 
-        bool canUpgrade = targetModule.IsTurret && ResearchHandler.Instance != null && ResearchHandler.Instance.unlockedWorkshopKnowledge && targetModule.CurrentLevel < 3;
-        if (upgradeButton != null)
+        ModuleScriptableObject moduleData = GetModuleData(targetModule.ModuleName);
+        bool canUpgrade = targetModule.IsTurret && moduleData != null;
+        int upgradeCost = 0;
+        string currencyLabel = "Bars";
+
+        if (canUpgrade)
         {
-            upgradeButton.gameObject.SetActive(targetModule.IsTurret);
-            upgradeButton.interactable = canUpgrade;
-            upgradeButton.onClick.RemoveAllListeners();
-            upgradeButton.onClick.AddListener(OnUpgradeClicked);
+            upgradeCost = targetModule.GetUpgradeCost(moduleData.buildCost);
+            currencyLabel = moduleData.costType == CurrencyType.Scrap ? "Scrap" : "Bars";
+
+            bool hasResources = false;
+            if (ResourceHandler.Instance != null)
+            {
+                hasResources = moduleData.costType == CurrencyType.Scrap
+                    ? ResourceHandler.Instance.Scrap >= upgradeCost
+                    : ResourceHandler.Instance.MetalBars >= upgradeCost;
+            }
+
+            if (upgradeButton != null)
+            {
+                upgradeButton.gameObject.SetActive(true);
+                upgradeButton.interactable = hasResources;
+                upgradeButton.onClick.RemoveAllListeners();
+                upgradeButton.onClick.AddListener(() => OnUpgradeClicked(moduleData.buildCost, moduleData.costType, upgradeCost));
+            }
+
+            if (upgradeCostText != null)
+            {
+                upgradeCostText.text = $"Upgrade: {upgradeCost} {currencyLabel}";
+            }
+        }
+        else
+        {
+            if (upgradeButton != null) upgradeButton.gameObject.SetActive(false);
+            if (upgradeCostText != null) upgradeCostText.text = "";
         }
 
         if (sellButton != null)
@@ -69,6 +98,16 @@ public class ModuleActionPanel : MonoBehaviour
             sellButton.onClick.RemoveAllListeners();
             sellButton.onClick.AddListener(OnSellClicked);
         }
+    }
+
+    private ModuleScriptableObject GetModuleData(string name)
+    {
+        if (BuildSystem.Instance == null || BuildSystem.Instance.AllAvailableModules == null) return null;
+
+        return System.Array.Find(
+            BuildSystem.Instance.AllAvailableModules,
+            data => data != null && data.moduleName == name
+        );
     }
 
     private void OnRepairClicked(int cost)
@@ -81,14 +120,31 @@ public class ModuleActionPanel : MonoBehaviour
         }
     }
 
-    private void OnUpgradeClicked()
+    private void OnUpgradeClicked(int baseCost, CurrencyType costType, int calculatedCost)
     {
         if (targetModule == null) return;
 
-        int cost = targetModule.CurrentLevel == 1 ? 20 : 40;
-        if (ResourceHandler.Instance != null && ResourceHandler.Instance.ConsumeMetalBars(cost))
+        bool success = false;
+        if (ResourceHandler.Instance != null)
         {
-            targetModule.UpgradeModule(targetModule.MaxHealth + 50, targetModule.EnergyDrain + 10);
+            if (costType == CurrencyType.Scrap)
+            {
+                success = ResourceHandler.Instance.ConsumeScrap(calculatedCost);
+            }
+            else
+            {
+                success = ResourceHandler.Instance.ConsumeMetalBars(calculatedCost);
+            }
+        }
+
+        if (success)
+        {
+            if (AudioManager.Instance != null)
+            {
+                AudioManager.Instance.PlayUIClick(2);
+            }
+
+            targetModule.UpgradeModule(baseCost, costType);
             RefreshPanel();
         }
     }
@@ -99,10 +155,7 @@ public class ModuleActionPanel : MonoBehaviour
 
         if (ResourceHandler.Instance != null)
         {
-            ModuleScriptableObject moduleData = System.Array.Find(
-                BuildSystem.Instance.AllAvailableModules,
-                data => data != null && data.moduleName == targetModule.ModuleName
-            );
+            ModuleScriptableObject moduleData = GetModuleData(targetModule.ModuleName);
 
             if (moduleData != null)
             {

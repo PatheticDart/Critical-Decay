@@ -26,7 +26,11 @@ public class BuildNodeButton : MonoBehaviour
 
     public void OnButtonClicked()
     {
-        Debug.Log($"BuildNodeButton clicked at Grid Position: {GridPosition}");
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayUIClick(2);
+        }
+
         if (buildSystem != null)
         {
             buildSystem.OnNodeClicked(this);

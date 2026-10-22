@@ -12,7 +12,7 @@ public class BuildSystem : MonoBehaviour
     [SerializeField] private Transform chuTransform;
     [SerializeField] private RectTransform nodeContainer;
     [SerializeField] private GameObject buildNodePrefab;
-    [SerializeField] private GameObject nodeOptionPrefab; // Prefab for built modules
+    [SerializeField] private GameObject nodeOptionPrefab;
     [SerializeField] private Camera buildCamera;
 
     [Header("Dynamic Shop UI")]
@@ -27,8 +27,6 @@ public class BuildSystem : MonoBehaviour
     private HashSet<Vector2Int> occupiedTiles = new HashSet<Vector2Int>();
     private Dictionary<Vector2Int, GameObject> activeNodes = new Dictionary<Vector2Int, GameObject>();
     private Dictionary<Vector2Int, RectTransform> activeNodeRects = new Dictionary<Vector2Int, RectTransform>();
-
-    // Tracking NodeOptionButton objects for built modules
     private Dictionary<Vector2Int, GameObject> activeOptionNodes = new Dictionary<Vector2Int, GameObject>();
     private Dictionary<Vector2Int, RectTransform> activeOptionNodeRects = new Dictionary<Vector2Int, RectTransform>();
 
@@ -82,14 +80,12 @@ public class BuildSystem : MonoBehaviour
     {
         if (buildCamera == null || chuTransform == null) return;
 
-        // 1. Position '+' Build Nodes
         foreach (var pair in activeNodeRects)
         {
             Vector3 worldPos = chuTransform.position + new Vector3(pair.Key.x * tileSize, pair.Key.y * tileSize, 0f);
             pair.Value.position = buildCamera.WorldToScreenPoint(worldPos);
         }
 
-        // 2. Position Module Option Nodes
         foreach (var pair in activeOptionNodeRects)
         {
             Vector3 worldPos = chuTransform.position + new Vector3(pair.Key.x * tileSize, pair.Key.y * tileSize, 0f);
@@ -166,7 +162,6 @@ public class BuildSystem : MonoBehaviour
 
         occupiedTiles.Add(buildGridPos);
 
-        // Spawn Option Node UI over built module
         SpawnOptionNodeAt(buildGridPos, moduleHealth);
 
         RebuildAllNodes();

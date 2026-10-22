@@ -3,7 +3,7 @@ using UnityEngine;
 public class SolarPanelLogic : MonoBehaviour
 {
     [Header("Energy Stats")]
-    [SerializeField] private int energyProduction = 10; // GDD: +10 Energy Threshold[cite: 19]
+    [SerializeField] private int energyProduction = 10;
 
     public int EnergyProduction => energyProduction;
 

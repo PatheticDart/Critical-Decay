@@ -41,24 +41,19 @@ public class DockingLogic : MonoBehaviour
     {
         if (playerObject == null) return;
 
-        // Calculate vector distance from CHU center to the player (Vector Subtraction)[cite: 4, 18, 21]
         Vector3 difference = playerObject.transform.position - transform.position;
 
-        // Compute magnitude of the displacement vector
         float distanceToPlayer = difference.magnitude;
 
-        // Check if player is within docking range
         bool inRange = distanceToPlayer <= dockingRange;
 
         if (!isDocked)
         {
-            // Toggle prompt based on range
             if (dockingPromptUI != null)
             {
                 dockingPromptUI.SetActive(inRange);
             }
 
-            // Listen for key input to activate Build Mode when within range
             if (inRange && Input.GetKeyDown(dockKey))
             {
                 EnterBuildMode();
@@ -70,19 +65,16 @@ public class DockingLogic : MonoBehaviour
     {
         isDocked = true;
 
-        // Hide UI Prompt
         if (dockingPromptUI != null)
         {
             dockingPromptUI.SetActive(false);
         }
 
-        // Deactivate the Player Object
         if (playerObject != null)
         {
             playerObject.SetActive(false);
         }
 
-        // Activate Build Camera
         if (buildCamera != null)
         {
             buildCamera.SetActive(true);
@@ -99,18 +91,15 @@ public class DockingLogic : MonoBehaviour
         }
     }
 
-    // Optional: Call this from a UI Button or Manager to exit Build Mode
     public void ExitBuildMode()
     {
         isDocked = false;
 
-        // Reactivate Player Object
         if (playerObject != null)
         {
             playerObject.SetActive(true);
         }
 
-        // Deactivate Build Camera
         if (buildCamera != null)
         {
             buildCamera.SetActive(false);
@@ -127,7 +116,6 @@ public class DockingLogic : MonoBehaviour
         }
     }
 
-    // Draw interaction radius in Scene View for debugging
     private void OnDrawGizmosSelected()
     {
         Gizmos.color = Color.cyan;

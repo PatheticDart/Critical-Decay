@@ -21,7 +21,7 @@ public class TurretLogic : MonoBehaviour
     [SerializeField] private float fireRate = 0.05f;
     [SerializeField] private int shotCount = 4;
     [SerializeField] private GameObject projectile;
-    [SerializeField] private float projectileSpeed = 10f; // Ensure this matches ProjectileLogic speed
+    [SerializeField] private float projectileSpeed = 10f;
     [SerializeField] private float alignmentTolerance = 0.98f;
     [SerializeField] private float projectileLifeTime = 3f;
     private float nextBurstTime = 0f;
@@ -55,13 +55,11 @@ public class TurretLogic : MonoBehaviour
         Vector2 myPos = transform.position;
         Vector2 targetPos = target.position;
 
-        // --- 1. EXTRACT REAL TARGET VELOCITY ---
         Vector2 targetVelocity = Vector2.zero;
 
         EnemyMoveLogic enemyMove = target.GetComponent<EnemyMoveLogic>();
         if (enemyMove != null)
         {
-            // Access velocity from EnemyMoveLogic
             targetVelocity = enemyMove.Velocity;
         }
         else
@@ -73,11 +71,9 @@ public class TurretLogic : MonoBehaviour
             }
         }
 
-        // --- 2. ITERATIVE LEAD PREDICTION ---
         Vector2 predictedTargetPos = targetPos;
         float travelTime = 0f;
 
-        // 2 iterations give near-exact lead points without performance cost
         for (int i = 0; i < 2; i++)
         {
             float dist = (predictedTargetPos - myPos).magnitude;
@@ -89,17 +85,13 @@ public class TurretLogic : MonoBehaviour
         float leadAngle = Mathf.Atan2(aimDirection.y, aimDirection.x) * Mathf.Rad2Deg - 90f;
         Quaternion targetRotation = Quaternion.Euler(0f, 0f, leadAngle);
 
-        // Calculate distance to current target for range checks
         float distance = (targetPos - myPos).magnitude;
 
-        // Alignment verification between barrel direction and lead angle
         float alignmentDot = Vector2.Dot((Vector2)transform.up, aimDirection);
         bool isAlignedWithLead = alignmentDot >= alignmentTolerance;
 
-        // --- 3. CONSTANT ROTATION ---
         transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
 
-        // --- 4. FIRING WITH ALIGNMENT CHECK ---
         switch (turretType)
         {
             case TurretType.Flame:
@@ -127,7 +119,6 @@ public class TurretLogic : MonoBehaviour
                 break;
 
             case TurretType.Shotgun:
-                // ShotgunTurretLineRenderer();
                 if (isAlignedWithLead && distance < range)
                 {
                     if (Time.time >= nextBurstTime)
@@ -137,6 +128,17 @@ public class TurretLogic : MonoBehaviour
                     }
                 }
                 break;
+        }
+    }
+
+    private void SpawnAndConfigureProjectile(Vector2 direction, float rotationAngle)
+    {
+        GameObject newProjectile = Instantiate(projectile, transform.position, Quaternion.Euler(0f, 0f, rotationAngle));
+
+        ProjectileLogic projLogic = newProjectile.GetComponent<ProjectileLogic>();
+        if (projLogic != null)
+        {
+            projLogic.Initialize(transform.position, direction, rotationAngle, damagePerRound, projectileSpeed, projectileLifeTime);
         }
     }
 
@@ -154,20 +156,10 @@ public class TurretLogic : MonoBehaviour
             float currentAngle = startAngle + (angleSpacing * i);
             float rad = currentAngle * Mathf.Deg2Rad;
 
-            float x = Mathf.Cos(rad);
-            float y = Mathf.Sin(rad);
-            Vector2 direction = new Vector2(x, y);
-
+            Vector2 direction = new Vector2(Mathf.Cos(rad), Mathf.Sin(rad));
             float projRot = currentAngle - 90f;
-            GameObject newProjectile = Instantiate(projectile, transform.position, Quaternion.Euler(0f, 0f, projRot));
 
-            ProjectileLogic rocketLogic = newProjectile.GetComponent<ProjectileLogic>();
-            if (rocketLogic != null)
-            {
-                rocketLogic.direction = direction;
-                rocketLogic.Damage = damagePerRound;
-            }
-            Destroy(newProjectile, projectileLifeTime);
+            SpawnAndConfigureProjectile(direction, projRot);
 
             yield return new WaitForSeconds(fireRate);
         }
@@ -181,23 +173,12 @@ public class TurretLogic : MonoBehaviour
         bool inSights = dot >= 0.98f;
 
         float radians = Mathf.Atan2(transform.up.y, transform.up.x);
-        float x = Mathf.Cos(radians);
-        float y = Mathf.Sin(radians);
-
-        Vector2 direction = new Vector2(x, y);
+        Vector2 direction = new Vector2(Mathf.Cos(radians), Mathf.Sin(radians));
 
         if (inSights)
         {
             float projRot = (radians * Mathf.Rad2Deg) - 90f;
-            GameObject newProjectile = Instantiate(projectile, transform.position, Quaternion.Euler(0f, 0f, projRot));
-
-            ProjectileLogic rocketLogic = newProjectile.GetComponent<ProjectileLogic>();
-            if (rocketLogic != null)
-            {
-                rocketLogic.direction = direction;
-                rocketLogic.Damage = damagePerRound;
-            }
-            Destroy(newProjectile, projectileLifeTime);
+            SpawnAndConfigureProjectile(direction, projRot);
         }
 
         yield return new WaitForSeconds(fireRate);
@@ -217,20 +198,10 @@ public class TurretLogic : MonoBehaviour
             float currentAngle = startAngle + (angleSpacing * i);
             float rad = currentAngle * Mathf.Deg2Rad;
 
-            float x = Mathf.Cos(rad);
-            float y = Mathf.Sin(rad);
-            Vector2 direction = new Vector2(x, y);
-
+            Vector2 direction = new Vector2(Mathf.Cos(rad), Mathf.Sin(rad));
             float projRot = currentAngle - 90f;
-            GameObject newProjectile = Instantiate(projectile, transform.position, Quaternion.Euler(0f, 0f, projRot));
 
-            ProjectileLogic rocketLogic = newProjectile.GetComponent<ProjectileLogic>();
-            if (rocketLogic != null)
-            {
-                rocketLogic.direction = direction;
-                rocketLogic.Damage = damagePerRound;
-            }
-            Destroy(newProjectile, projectileLifeTime);
+            SpawnAndConfigureProjectile(direction, projRot);
 
             yield return new WaitForSeconds(fireRate);
         }
@@ -296,56 +267,10 @@ public class TurretLogic : MonoBehaviour
         lineRenderer.endColor = Color.red;
     }
 
-    void ShotgunTurretLineRenderer()
+    public void UpgradeTurretStats(int level)
     {
-        Vector3 origin = transform.position;
-
-        float forwardRad = Mathf.Atan2(transform.up.y, transform.up.x);
-        float halfCone = coneAngle / 2f;
-        float angleSpacing = coneAngle / shotCount;
-        float offset = angleSpacing / 2f;
-        float startAngle = (forwardRad * Mathf.Rad2Deg) - halfCone + offset;
-
-        int circleSegments = 40;
-
-        lineRenderer.positionCount = (shotCount * 3) + (circleSegments + 1);
-
-        int pointIndex = 0;
-        float lastPelletAngleDeg = 0f;
-
-        for (int i = 0; i < shotCount; i++)
-        {
-            float currentAngle = startAngle + (i * angleSpacing);
-            float rad = currentAngle * Mathf.Deg2Rad;
-
-            Vector3 direction = new Vector3(Mathf.Cos(rad), Mathf.Sin(rad), 0f);
-            Vector3 endPoint = origin + (direction * range);
-
-            lineRenderer.SetPosition(pointIndex++, origin);
-            lineRenderer.SetPosition(pointIndex++, endPoint);
-
-            if (i == shotCount - 1)
-            {
-                lineRenderer.SetPosition(pointIndex++, endPoint);
-                lastPelletAngleDeg = currentAngle;
-            }
-            else
-            {
-                lineRenderer.SetPosition(pointIndex++, origin);
-            }
-        }
-
-        float step = 360f / circleSegments;
-        for (int i = 0; i <= circleSegments; i++)
-        {
-            float currentCircleAngle = lastPelletAngleDeg + (i * step);
-            float rad = currentCircleAngle * Mathf.Deg2Rad;
-
-            Vector3 circlePoint = origin + new Vector3(Mathf.Cos(rad), Mathf.Sin(rad), 0f) * range;
-            lineRenderer.SetPosition(pointIndex++, circlePoint);
-        }
-
-        lineRenderer.startColor = Color.white;
-        lineRenderer.endColor = Color.white;
+        damagePerRound = Mathf.RoundToInt(damagePerRound * 1.20f);
+        fireRate = fireRate * 1.10f;
+        range = range * 1.05f;
     }
 }

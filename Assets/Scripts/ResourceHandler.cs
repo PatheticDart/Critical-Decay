@@ -11,11 +11,11 @@ public class ResourceHandler : MonoBehaviour
     [SerializeField] private int researchSamples = 0;
 
     [Header("Refinery Processing Settings")]
-    [SerializeField] private float conversionRateSeconds = 1.0f; // Time per conversion step
-    [SerializeField] private int scrapPerConversion = 3;        // 3 Scrap -> 1 Metal Bar
+    [SerializeField] private float conversionRateSeconds = 1.0f;
+    [SerializeField] private int scrapPerConversion = 3;
 
     [Header("Energy System")]
-    [SerializeField] private int maxEnergyThreshold = 20; // CHU Base Energy = +20
+    [SerializeField] private int maxEnergyThreshold = 20;
     [SerializeField] private int currentEnergyDrain = 0;
 
     [Header("UI Text References")]
@@ -34,7 +34,6 @@ public class ResourceHandler : MonoBehaviour
     [SerializeField] private Vector3 punchScaleTarget = new Vector3(1.3f, 1.3f, 1.3f);
     [SerializeField] private float counterDuration = 0.5f;
 
-    // Discrete Integer Display Values
     private int displayedScrap;
     private int startScrap;
 
@@ -44,7 +43,6 @@ public class ResourceHandler : MonoBehaviour
     private int displayedResearch;
     private int startResearch;
 
-    // Animation Timers & States
     private float scrapCounterTime, metalCounterTime, researchCounterTime;
     private bool isScrapCounting, isMetalCounting, isResearchCounting;
 
@@ -97,7 +95,6 @@ public class ResourceHandler : MonoBehaviour
             {
                 nextConversionTime = Time.time + conversionRateSeconds;
 
-                // Subtract scrap & add metal bar with UI feedback
                 scrap -= scrapPerConversion;
                 TriggerScrapAnimation();
 
@@ -109,7 +106,6 @@ public class ResourceHandler : MonoBehaviour
 
     private void UpdateAnimationsAndText()
     {
-        // 1. Scrap Integer Counter & Punch
         if (isScrapCounting)
         {
             scrapCounterTime += Time.deltaTime;
@@ -134,7 +130,6 @@ public class ResourceHandler : MonoBehaviour
             }
         }
 
-        // 2. Metal Bars Integer Counter & Punch
         if (isMetalCounting)
         {
             metalCounterTime += Time.deltaTime;
@@ -159,7 +154,6 @@ public class ResourceHandler : MonoBehaviour
             }
         }
 
-        // 3. Research Samples Integer Counter & Punch
         if (isResearchCounting)
         {
             researchCounterTime += Time.deltaTime;
@@ -184,7 +178,6 @@ public class ResourceHandler : MonoBehaviour
             }
         }
 
-        // Refresh UI Text strings with clean integers
         if (scrapText != null) scrapText.text = displayedScrap.ToString();
         if (metalBarsText != null) metalBarsText.text = displayedMetalBars.ToString();
         if (researchSamplesText != null) researchSamplesText.text = displayedResearch.ToString();

@@ -1,26 +1,26 @@
 using System.Collections;
-using TMPro; // Use UnityEngine.UI if using standard Text components
+using TMPro;
 using UnityEngine;
 
 public class SpawnHandler : MonoBehaviour
 {
     [Header("Spawn Origin Settings")]
-    [SerializeField] private Transform chuTransform; // Central anchor (CHU Module)
-    [SerializeField] private float spawnRadius = 30f; // Distance from CHU where enemies spawn
+    [SerializeField] private Transform chuTransform;
+    [SerializeField] private float spawnRadius = 30f;
 
     [Header("Timing Settings")]
-    [SerializeField] private float initialIntermissionTime = 90f; // Wave 0 prep time
-    [SerializeField] private float standardIntermissionTime = 50f; // Standardized intermission between waves
+    [SerializeField] private float initialIntermissionTime = 90f;
+    [SerializeField] private float standardIntermissionTime = 50f;
     [SerializeField] private float spawnIntervalWithinWave = 0.5f;
 
     [Header("Wave Progression & Cap Settings")]
-    [SerializeField] private int baseWaveEnemies = 10; // Wave 1 enemy count
-    [SerializeField] private int enemyIncrementPerWave = 5; // +5 per wave
-    [SerializeField] private int maxActiveEnemies = 30; // Max enemies active simultaneously
+    [SerializeField] private int baseWaveEnemies = 10;
+    [SerializeField] private int enemyIncrementPerWave = 5;
+    [SerializeField] private int maxActiveEnemies = 30;
 
     [Header("UI References")]
-    [SerializeField] private TextMeshProUGUI waveText;   // Wave Header Title
-    [SerializeField] private TextMeshProUGUI timerText;  // Intermission Timer & Enemies Remaining Text
+    [SerializeField] private TextMeshProUGUI waveText;
+    [SerializeField] private TextMeshProUGUI timerText;
 
     [Header("Pool Keys (ObjectPoolManager)")]
     [SerializeField] private string dronePoolKey = "Drone";
@@ -53,14 +53,12 @@ public class SpawnHandler : MonoBehaviour
 
     private IEnumerator WaveLoop()
     {
-        // 1. Initial Preparation Phase (Wave 0)
         isIntermission = true;
         SetWaveHeader("PREPARATION PHASE");
         yield return StartCoroutine(RunIntermissionCountdown(initialIntermissionTime));
 
         while (true)
         {
-            // 2. Start Active Wave
             currentWave++;
             isIntermission = false;
             isSpawningWave = true;
@@ -70,29 +68,23 @@ public class SpawnHandler : MonoBehaviour
             int totalEnemiesForWave = baseWaveEnemies + ((currentWave - 1) * enemyIncrementPerWave);
             remainingWaveEnemies = totalEnemiesForWave;
 
-            // Update UI with initial enemy count
             UpdateEnemiesLeftUI();
 
-            // Spawn all wave enemies
             yield return StartCoroutine(SpawnWaveRoutine(totalEnemiesForWave));
 
             isSpawningWave = false;
 
-            // 3. Wait until all enemies in the scene are destroyed/cleared
             while (remainingWaveEnemies > 0 || EnemyLogic.ActiveEnemies.Count > 0)
             {
-                // Update enemy count display in real time based on active pooled enemies + unspawned queue
                 remainingWaveEnemies = EnemyLogic.ActiveEnemies.Count;
                 UpdateEnemiesLeftUI();
                 yield return new WaitForSeconds(0.2f);
             }
 
-            // Ensure 0 ENEMIES LEFT display before transition
             remainingWaveEnemies = 0;
             UpdateEnemiesLeftUI();
             yield return new WaitForSeconds(1.0f);
 
-            // 4. Intermission Phase
             isIntermission = true;
             SetWaveHeader("INTERMISSION");
             yield return StartCoroutine(RunIntermissionCountdown(standardIntermissionTime));
@@ -169,7 +161,6 @@ public class SpawnHandler : MonoBehaviour
 
             spawnedCount++;
 
-            // Recalculate remaining enemies (Active on screen + unspawned)
             remainingWaveEnemies = EnemyLogic.ActiveEnemies.Count + (totalEnemies - spawnedCount);
             UpdateEnemiesLeftUI();
 
@@ -192,17 +183,17 @@ public class SpawnHandler : MonoBehaviour
 
         if (currentWave < 5)
         {
-            return dronePoolKey; // Waves 1-4: 100% Drone
+            return dronePoolKey;
         }
         else if (currentWave < 10)
         {
-            return roll < 0.5f ? dronePoolKey : rangerPoolKey; // Waves 5-9: 50% Drone, 50% Ranger
+            return roll < 0.5f ? dronePoolKey : rangerPoolKey;
         }
         else
         {
-            if (roll < 0.50f) return dronePoolKey;      // Waves 10+: 50% Drone
-            if (roll < 0.80f) return rangerPoolKey;     // 30% Ranger
-            return basiliskPoolKey;                   // 20% Basilisk
+            if (roll < 0.50f) return dronePoolKey;
+            if (roll < 0.80f) return rangerPoolKey;
+            return basiliskPoolKey;
         }
     }
 

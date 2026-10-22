@@ -628,3 +628,4 @@ MonoBehaviour:
   costText: {fileID: 892761948189191855}
   energyDrainText: {fileID: 297885966900821777}
   actionButton: {fileID: 6509065759075549341}
+  buttonClickSFX: {fileID: 0}

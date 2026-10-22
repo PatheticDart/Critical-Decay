@@ -23,6 +23,10 @@ public class EnemyLogic : MonoBehaviour
     [Header("Visual Effects")]
     [SerializeField] private GameObject explosionPrefab;
 
+    [Header("Audio SFX")]
+    [SerializeField] private AudioClip deathSFX;
+    [Range(0f, 1f)][SerializeField] private float deathSFXVolume = 1f;
+
     private int currentHealth;
 
     private void Awake()
@@ -46,21 +50,17 @@ public class EnemyLogic : MonoBehaviour
 
     private void CheckPlayerProjectilesMath()
     {
-        // Iterate backwards through active player projectiles
         for (int i = ProjectileLogic.ActivePlayerProjectiles.Count - 1; i >= 0; i--)
         {
             ProjectileLogic projectile = ProjectileLogic.ActivePlayerProjectiles[i];
             if (projectile == null || !projectile.gameObject.activeInHierarchy) continue;
 
-            // Pure vector distance check
             float distance = Vector2.Distance(projectile.transform.position, transform.position);
 
             if (distance <= proximityRadius)
             {
-                // Take damage from projectile
                 TakeDamage(projectile.Damage);
 
-                // Destroy/despawn projectile
                 projectile.Despawn();
 
                 if (currentHealth <= 0) break;
@@ -81,7 +81,11 @@ public class EnemyLogic : MonoBehaviour
 
     private void Die()
     {
-        // Instantiate explosion visual effects
+        if (deathSFX != null)
+        {
+            AudioSource.PlayClipAtPoint(deathSFX, transform.position, deathSFXVolume);
+        }
+
         if (explosionPrefab != null)
         {
             Instantiate(explosionPrefab, transform.position, Quaternion.identity);
@@ -94,12 +98,11 @@ public class EnemyLogic : MonoBehaviour
 
         SpawnLootDrops();
 
-        gameObject.SetActive(false); // Compatible with Object Pooling
+        gameObject.SetActive(false);
     }
 
     private void SpawnLootDrops()
     {
-        // 1. Scrap Metal Drop Chance
         if (scrapPickupPrefab != null && Random.value <= scrapDropChance)
         {
             GameObject scrapObj = Instantiate(scrapPickupPrefab, transform.position, Quaternion.identity);
@@ -110,20 +113,19 @@ public class EnemyLogic : MonoBehaviour
             }
         }
 
-        // 2. Research Sample Drop Chance (GDD drop rates: Drone 1-2, Ranger 2-3, Basilisk 5-10)
         if (researchSamplePickupPrefab != null && Random.value <= researchSampleDropChance)
         {
             int sampleCount = 1;
             switch (enemyType)
             {
                 case EnemyType.Drone:
-                    sampleCount = Random.Range(1, 3); // 1-2
+                    sampleCount = Random.Range(1, 3);
                     break;
                 case EnemyType.Ranger:
-                    sampleCount = Random.Range(2, 4); // 2-3
+                    sampleCount = Random.Range(2, 4);
                     break;
                 case EnemyType.Basilisk:
-                    sampleCount = Random.Range(5, 11); // 5-10
+                    sampleCount = Random.Range(5, 11);
                     break;
             }
 

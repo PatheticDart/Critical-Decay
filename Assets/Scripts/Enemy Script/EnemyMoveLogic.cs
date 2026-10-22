@@ -3,16 +3,16 @@ using UnityEngine;
 public class EnemyMoveLogic : MonoBehaviour
 {
     [Header("Zero-G Propulsion")]
-    [SerializeField] private float thrustAcceleration = 8f;   // GDD Speeds[cite: 61]
+    [SerializeField] private float thrustAcceleration = 8f;
     [SerializeField] private float maxSpeed = 8f;
-    [SerializeField] private float turningSpeed = 180f;      // Constant rotation speed (deg/sec)[cite: 50]
+    [SerializeField] private float turningSpeed = 180f;
     [SerializeField] private float angularDrag = 2f;
 
     [Header("Engagement & Jousting")]
-    [SerializeField] private float ramRadius = 0.6f;          // Drone ramming radius[cite: 61]
-    [SerializeField] private float minEngagementDist = 6f;   // Ranger/Basilisk distance[cite: 61]
+    [SerializeField] private float ramRadius = 0.6f;
+    [SerializeField] private float minEngagementDist = 6f;
     [SerializeField] private float maxEngagementDist = 12f;
-    [SerializeField] private int ramDamage = 2;              // Drone ramming damage[cite: 61]
+    [SerializeField] private int ramDamage = 2;
 
     private EnemyTargetingLogic targeting;
     private EnemyLogic enemyLogic;
@@ -20,7 +20,6 @@ public class EnemyMoveLogic : MonoBehaviour
     public Vector2 Velocity => velocity;
     private float angularVelocity;
 
-    // Ranger jousting pass flag
     private bool isDisengaging = false;
 
     private void Awake()
@@ -73,7 +72,6 @@ public class EnemyMoveLogic : MonoBehaviour
         velocity += (Vector2)transform.up * thrustAcceleration * Time.deltaTime;
         velocity = Vector2.ClampMagnitude(velocity, maxSpeed);
 
-        // Ramming check[cite: 18, 21, 61]
         if (distance <= ramRadius)
         {
             ModuleHealth module = target.GetComponent<ModuleHealth>();
@@ -91,7 +89,6 @@ public class EnemyMoveLogic : MonoBehaviour
 
     private void HandleRangerJousting(Vector2 toTarget, float distance)
     {
-        // Toggle state: Charge in until reaching min engagement distance, then disengage/overshoot
         if (!isDisengaging && distance <= minEngagementDist)
         {
             isDisengaging = true;
@@ -104,7 +101,6 @@ public class EnemyMoveLogic : MonoBehaviour
         Vector2 moveDirection = isDisengaging ? -toTarget : toTarget;
         SteerTowards(moveDirection);
 
-        // Thrust forward along facing vector[cite: 18, 19]
         velocity += (Vector2)transform.up * thrustAcceleration * Time.deltaTime;
         velocity = Vector2.ClampMagnitude(velocity, maxSpeed);
     }
@@ -125,7 +121,6 @@ public class EnemyMoveLogic : MonoBehaviour
         }
         else
         {
-            // Perpendicular orbit vector (-y, x)[cite: 21, 27]
             desiredThrust = new Vector2(-toTarget.y, toTarget.x).normalized;
         }
 
@@ -138,7 +133,6 @@ public class EnemyMoveLogic : MonoBehaviour
         float targetAngle = Mathf.Atan2(targetDirection.y, targetDirection.x) * Mathf.Rad2Deg - 90f;
         Quaternion targetRotation = Quaternion.Euler(0f, 0f, targetAngle);
 
-        // Constant angular speed rotation replacing Slerp easing[cite: 50, 53]
         transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, turningSpeed * Time.deltaTime);
     }
 

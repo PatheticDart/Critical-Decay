@@ -27,6 +27,11 @@ public class NodeOptionButton : MonoBehaviour
     {
         if (targetModule == null) return;
 
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayUIClick(2);
+        }
+
         ModuleActionPanel actionPanel = FindObjectOfType<ModuleActionPanel>(true);
         if (actionPanel != null)
         {

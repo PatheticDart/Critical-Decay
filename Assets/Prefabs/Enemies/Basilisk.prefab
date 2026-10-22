@@ -269,7 +269,7 @@ MonoBehaviour:
   maxHealth: 50
   scrapPickupPrefab: {fileID: 6229705654526264191, guid: 582e5d6b4f66fed429512f4e5817749b, type: 3}
   researchSamplePickupPrefab: {fileID: 2480850708899181359, guid: bbb8258f2ec895942beb2bee07832ac3, type: 3}
-  scrapDropChance: 0.6
+  scrapDropChance: 1
   researchSampleDropChance: 0.8
   explosionPrefab: {fileID: 5995101608946688517, guid: eee92205d0cbfcf469420508d34cf535, type: 3}
 --- !u!114 &42188874254676616

@@ -7284,7 +7284,7 @@ MonoBehaviour:
   scrapPickupPrefab: {fileID: 7304534913823487383, guid: 95f4286295cd51b489b98ad275b0866c, type: 3}
   researchSamplePickupPrefab: {fileID: 2480850708899181359, guid: bbb8258f2ec895942beb2bee07832ac3, type: 3}
   scrapDropChance: 0.6
-  researchSampleDropChance: 0.8
+  researchSampleDropChance: 0.5
   explosionPrefab: {fileID: 5995101608946688517, guid: eee92205d0cbfcf469420508d34cf535, type: 3}
 --- !u!114 &8566105419747201130
 MonoBehaviour:

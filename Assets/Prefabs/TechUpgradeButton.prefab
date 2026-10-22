@@ -414,6 +414,7 @@ MonoBehaviour:
   costText: {fileID: 3804677809487892495}
   detailsText: {fileID: 8451087352364862582}
   unlockButton: {fileID: 1049862967840709064}
+  buttonClickSFX: {fileID: 0}
 --- !u!1 &8732303900185105173
 GameObject:
   m_ObjectHideFlags: 0

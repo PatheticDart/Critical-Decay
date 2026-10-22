@@ -11,7 +11,7 @@ public class PickupLogic : MonoBehaviour
     [Header("Pickup Settings")]
     [SerializeField] private PickupType type = PickupType.Scrap;
     [SerializeField] private int amount = 1;
-    [SerializeField] private float collectionRadius = 1.5f;
+    [SerializeField] private float collectionRadius = 2.0f;
 
     [Header("Fly-to-UI Animation Settings")]
     [SerializeField] private float flyDuration = 0.8f;
@@ -34,14 +34,21 @@ public class PickupLogic : MonoBehaviour
     private void Start()
     {
         mainCamera = Camera.main;
+        FindPlayer();
+        FindUIRefs();
+    }
 
+    private void FindPlayer()
+    {
         PlayerController player = FindObjectOfType<PlayerController>();
         if (player != null)
         {
             playerTransform = player.transform;
         }
+    }
 
-        // Auto-find UI RectTransforms if not assigned in Inspector
+    private void FindUIRefs()
+    {
         if (scrapUIRect == null)
         {
             GameObject scrapObj = GameObject.Find("Scrap Text");
@@ -63,7 +70,13 @@ public class PickupLogic : MonoBehaviour
             return;
         }
 
-        if (isCollected || playerTransform == null) return;
+        if (isCollected) return;
+
+        if (playerTransform == null)
+        {
+            FindPlayer();
+            if (playerTransform == null) return;
+        }
 
         float dist = Vector2.Distance(transform.position, playerTransform.position);
         if (dist <= collectionRadius)
@@ -77,8 +90,7 @@ public class PickupLogic : MonoBehaviour
         isCollected = true;
         startWorldPos = transform.position;
 
-        // Calculate a curved arc mid-point towards the camera
-        Vector3 midPoint = startWorldPos + new Vector3(Random.Range(-1.5f, 1.5f), 2.0f, 0f);
+        Vector3 midPoint = startWorldPos + new Vector3(Random.Range(-1.0f, 1.0f), 1.5f, 0f);
         controlWorldPos = midPoint;
 
         flyElapsedTime = 0f;
@@ -90,27 +102,29 @@ public class PickupLogic : MonoBehaviour
         flyElapsedTime += Time.deltaTime;
         float t = Mathf.Clamp01(flyElapsedTime / flyDuration);
 
-        // Ease-in quadratic acceleration for magnet effect
         float easedT = t * t;
 
-        // Target UI World Position calculation
         RectTransform targetRect = (type == PickupType.Scrap) ? scrapUIRect : researchUIRect;
+
+        if (targetRect == null)
+        {
+            FindUIRefs();
+            targetRect = (type == PickupType.Scrap) ? scrapUIRect : researchUIRect;
+        }
+
         Vector3 targetWorldPos = startWorldPos;
 
         if (targetRect != null && mainCamera != null)
         {
-            // Convert Screen/UI position to World Space at camera plane
             Vector3 screenPos = targetRect.position;
             screenPos.z = Mathf.Abs(mainCamera.transform.position.z);
             targetWorldPos = mainCamera.ScreenToWorldPoint(screenPos);
         }
 
-        // Quadratic Bezier Interpolation (World Space)
         Vector3 m1 = Vector3.Lerp(startWorldPos, controlWorldPos, easedT);
         Vector3 m2 = Vector3.Lerp(controlWorldPos, targetWorldPos, easedT);
         transform.position = Vector3.Lerp(m1, m2, easedT);
 
-        // Shrink slightly as it enters the UI text counter
         transform.localScale = Vector3.Lerp(Vector3.one, Vector3.one * 0.3f, easedT);
 
         if (t >= 1f)
@@ -122,7 +136,6 @@ public class PickupLogic : MonoBehaviour
 
     private void OnArrivedAtUI()
     {
-        // Add resources & trigger ResourceHandler punch animation on impact
         if (ResourceHandler.Instance != null)
         {
             if (type == PickupType.Scrap)

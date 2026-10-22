@@ -13,7 +13,7 @@ public class ModuleHealth : MonoBehaviour
     [SerializeField] private bool isTurret = false;
 
     [Header("Energy Drain Stat")]
-    [SerializeField] private int energyDrain = 10; // GDD Energy Drain[cite: 19, 20]
+    [SerializeField] private int energyDrain = 10;
 
     [Header("Health Settings")]
     [SerializeField] private int maxHealth = 100;
@@ -25,7 +25,11 @@ public class ModuleHealth : MonoBehaviour
     [Header("Visual Effects")]
     [SerializeField] private GameObject explosionPrefab;
 
-    private int currentHealth;
+    [SerializeField] private int currentHealth;
+
+    [Header("Audio SFX")]
+    [SerializeField] private AudioClip deathSFX;
+    [Range(0f, 1f)][SerializeField] private float deathSFXVolume = 1f;
     private bool isDestroyed = false;
     private bool isDeactivatedByEnergy = false;
 
@@ -129,18 +133,31 @@ public class ModuleHealth : MonoBehaviour
         currentHealth = maxHealth;
     }
 
-    public void UpgradeModule(int newHealth, int newEnergyDrain)
+    public void UpgradeModule(int baseCost, CurrencyType costType)
     {
         currentLevel++;
-        maxHealth = newHealth;
+
+        maxHealth = Mathf.RoundToInt(maxHealth * 1.25f);
         currentHealth = maxHealth;
 
+        int newEnergyDrain = energyDrain + 5;
         if (ResourceHandler.Instance != null)
         {
             ResourceHandler.Instance.ModifyEnergyDrain(newEnergyDrain - energyDrain);
         }
-
         energyDrain = newEnergyDrain;
+
+        TurretLogic childTurret = GetComponentInChildren<TurretLogic>(true);
+        if (childTurret != null)
+        {
+            childTurret.UpgradeTurretStats(currentLevel);
+        }
+    }
+
+    public int GetUpgradeCost(int baseCost)
+    {
+        float calculatedCost = baseCost * Mathf.Pow(1.20f, currentLevel - 1);
+        return Mathf.CeilToInt(calculatedCost);
     }
 
     public void TakeDamage(int damageAmount)
@@ -160,6 +177,11 @@ public class ModuleHealth : MonoBehaviour
         if (isDestroyed) return;
         isDestroyed = true;
 
+        if (deathSFX != null)
+        {
+            AudioSource.PlayClipAtPoint(deathSFX, transform.position, deathSFXVolume);
+        }
+
         if (explosionPrefab != null)
         {
             Instantiate(explosionPrefab, transform.position, Quaternion.identity);
@@ -169,13 +191,11 @@ public class ModuleHealth : MonoBehaviour
 
         if (isCHUModule)
         {
-            // Trigger Game Over
             if (GameManager.Instance != null)
             {
                 GameManager.Instance.GameOver();
             }
 
-            // Destroy remaining modules on station collapse
             for (int i = ActivePlayerModules.Count - 1; i >= 0; i--)
             {
                 if (ActivePlayerModules[i] != null)

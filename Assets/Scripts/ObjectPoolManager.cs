@@ -8,7 +8,7 @@ public class ObjectPoolManager : MonoBehaviour
     [System.Serializable]
     public struct PoolConfig
     {
-        public string poolKey;            // "Drone", "Ranger", "Basilisk", "PlayerBullet", "EnemyBullet"
+        public string poolKey;
         public GameObject prefab;
         public int initialCapacity;
     }
@@ -55,10 +55,6 @@ public class ObjectPoolManager : MonoBehaviour
             prefabLookup.Add(config.poolKey, config.prefab);
         }
     }
-
-    /// <summary>
-    /// Spawns or retrieves an inactive GameObject from the pool using pure 2D transform positioning.
-    /// </summary>
     public GameObject SpawnFromPool(string poolKey, Vector2 position, Quaternion rotation)
     {
         if (!poolDictionary.ContainsKey(poolKey))
@@ -71,7 +67,6 @@ public class ObjectPoolManager : MonoBehaviour
 
         GameObject objToSpawn;
 
-        // Expand pool dynamically if capacity is depleted
         if (queue.Count == 0 || queue.Peek().activeInHierarchy)
         {
             objToSpawn = Instantiate(prefabLookup[poolKey], transform);
@@ -90,9 +85,6 @@ public class ObjectPoolManager : MonoBehaviour
         return objToSpawn;
     }
 
-    /// <summary>
-    /// Spawns and initializes a pooled Projectile cleanly.
-    /// </summary>
     public ProjectileLogic SpawnProjectile(string poolKey, Vector2 position, Vector2 direction, float zRotation, int damage)
     {
         GameObject projObj = SpawnFromPool(poolKey, position, Quaternion.Euler(0f, 0f, zRotation));

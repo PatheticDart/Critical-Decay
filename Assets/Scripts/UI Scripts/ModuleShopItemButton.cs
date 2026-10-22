@@ -10,6 +10,8 @@ public class ModuleShopItemButton : MonoBehaviour
     [SerializeField] private TextMeshProUGUI energyDrainText;
     [SerializeField] private Button actionButton;
 
+    [SerializeField] private AudioClip buttonClickSFX;
+
     private ModuleScriptableObject moduleData;
 
     public void Setup(ModuleScriptableObject data)
@@ -25,7 +27,6 @@ public class ModuleShopItemButton : MonoBehaviour
         }
         if (energyDrainText != null) energyDrainText.text = $"{data.energyDrain} Energy";
 
-        // Check unique module existence (Refinery & Observatory)
         bool isAlreadyBuilt = false;
         if (data.isRefinery)
         {
@@ -40,13 +41,20 @@ public class ModuleShopItemButton : MonoBehaviour
         {
             actionButton.interactable = !isAlreadyBuilt;
             actionButton.onClick.RemoveAllListeners();
-            actionButton.onClick.AddListener(() =>
-            {
-                if (BuildSystem.Instance != null)
-                {
-                    BuildSystem.Instance.SelectModuleToBuild(moduleData);
-                }
-            });
+            actionButton.onClick.AddListener(OnItemClicked);
+        }
+    }
+
+    private void OnItemClicked()
+    {
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayUIClick(1);
+        }
+
+        if (BuildSystem.Instance != null)
+        {
+            BuildSystem.Instance.SelectModuleToBuild(moduleData);
         }
     }
 }

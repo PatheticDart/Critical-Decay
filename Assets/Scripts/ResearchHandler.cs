@@ -5,11 +5,11 @@ public class ResearchHandler : MonoBehaviour
     public static ResearchHandler Instance { get; private set; }
 
     [Header("Unlocked Technologies")]
-    public bool unlockedEnergyProduction = false; // Solar Panel
-    public bool unlockedMoltenMetal = false;      // Shrapnel Turret
-    public bool unlockedBoltAcquisition = false;  // Bolt Turret
-    public bool unlockedWorkshopKnowledge = false;// Turret Upgrades
-    public bool unlockedCombatOutfit = false;     // Player Ship Upgrade
+    public bool unlockedEnergyProduction = false;
+    public bool unlockedMoltenMetal = false;
+    public bool unlockedBoltAcquisition = false;
+    public bool unlockedWorkshopKnowledge = false;
+    public bool unlockedCombatOutfit = false;
 
     private void Awake()
     {

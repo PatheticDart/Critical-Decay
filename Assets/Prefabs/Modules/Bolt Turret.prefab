@@ -116,6 +116,9 @@ MonoBehaviour:
   hitRadius: 0.5
   currentLevel: 1
   explosionPrefab: {fileID: 0}
+  currentHealth: 0
+  deathSFX: {fileID: 0}
+  deathSFXVolume: 1
 --- !u!1 &3074163842430552784
 GameObject:
   m_ObjectHideFlags: 0
@@ -199,7 +202,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 1
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 7311577504204938024, guid: 40d6984cb4e1e564eab3d1665a95c9b4, type: 3}
+  m_Sprite: {fileID: 2694603551003506812, guid: f81fccd548194d64b84ea6b246cfae25, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0

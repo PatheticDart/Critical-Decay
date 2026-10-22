@@ -4,12 +4,16 @@ public class PlayerHealth : MonoBehaviour
 {
     [Header("Player Health Settings")]
     [SerializeField] private int maxHealth = 100;
-    [SerializeField] private float hitRadius = 0.5f; // Pure math hit registration radius
+    [SerializeField] private float hitRadius = 0.5f;
 
     [Header("Visual Effects")]
     [SerializeField] private GameObject explosionPrefab;
 
     [SerializeField] private int currentHealth;
+
+    [Header("Audio SFX")]
+    [SerializeField] private AudioClip deathSFX;
+    [Range(0f, 1f)][SerializeField] private float deathSFXVolume = 1f;
     private bool isDestroyed = false;
 
     public int CurrentHealth => currentHealth;
@@ -29,7 +33,6 @@ public class PlayerHealth : MonoBehaviour
     {
         if (isDestroyed) return;
 
-        // Pure distance math loop against static list of active enemy projectiles
         for (int i = ProjectileLogic.ActiveEnemyProjectiles.Count - 1; i >= 0; i--)
         {
             ProjectileLogic proj = ProjectileLogic.ActiveEnemyProjectiles[i];
@@ -41,7 +44,6 @@ public class PlayerHealth : MonoBehaviour
             {
                 TakeDamage(proj.Damage);
 
-                // Destroy projectile on hit
                 Destroy(proj.gameObject);
 
                 if (isDestroyed) break;
@@ -66,12 +68,16 @@ public class PlayerHealth : MonoBehaviour
         if (isDestroyed) return;
         isDestroyed = true;
 
+        if (deathSFX != null)
+        {
+            AudioSource.PlayClipAtPoint(deathSFX, transform.position, deathSFXVolume);
+        }
+
         if (explosionPrefab != null)
         {
             Instantiate(explosionPrefab, transform.position, Quaternion.identity);
         }
 
-        // Trigger Game Over
         if (GameManager.Instance != null)
         {
             GameManager.Instance.GameOver();

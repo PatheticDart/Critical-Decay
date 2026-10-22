@@ -3,8 +3,8 @@ using UnityEngine;
 public class PlayerShootLogic : MonoBehaviour
 {
     [Header("Weapon Mount References")]
-    [SerializeField] private Transform weaponMount; // Assign child Gun/Pivot transform
-    [SerializeField] private Transform firePoint;   // Assign child FirePoint transform
+    [SerializeField] private Transform weaponMount;
+    [SerializeField] private Transform firePoint;
 
     [Header("Combat Settings")]
     [SerializeField] private string projectilePoolKey = "PlayerBullet";
@@ -18,7 +18,6 @@ public class PlayerShootLogic : MonoBehaviour
     {
         mainCam = Camera.main;
 
-        // Auto-create invisible weapon mount if missing
         if (weaponMount == null)
         {
             GameObject mountObj = new GameObject("WeaponMount");

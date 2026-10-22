@@ -3,7 +3,7 @@ using UnityEngine;
 
 public enum ProjectileType
 {
-    Player, // Player ship + Turret modules
+    Player,
     Enemy
 }
 
@@ -18,7 +18,11 @@ public class ProjectileLogic : MonoBehaviour
     [SerializeField] private float speed = 10f;
     [SerializeField] private float maxLifetime = 3f;
 
-    [Header("Visual Effects")]
+    [Header("Audio SFX")]
+    [SerializeField] private AudioClip projectileFireSFX;
+    [SerializeField] private AudioSource fireAudioSource;
+
+    [Header("Visual Effects (Hit SFX is attached to this Prefab)")]
     [SerializeField] private GameObject hitVfxPrefab;
 
     public Vector2 direction;
@@ -31,6 +35,22 @@ public class ProjectileLogic : MonoBehaviour
     }
 
     public ProjectileType Type => type;
+
+    private void Start()
+    {
+        PlayFireSFX();
+    }
+
+    public void Initialize(Vector2 startPosition, Vector2 moveDirection, float zRotation, int damageValue, float speedValue, float lifetimeValue)
+    {
+        transform.position = startPosition;
+        transform.rotation = Quaternion.Euler(0f, 0f, zRotation);
+        direction = moveDirection.normalized;
+        damage = damageValue;
+        speed = speedValue;
+        maxLifetime = lifetimeValue;
+        currentLifetime = 0f;
+    }
 
     private void OnEnable()
     {
@@ -46,6 +66,8 @@ public class ProjectileLogic : MonoBehaviour
             if (!ActiveEnemyProjectiles.Contains(this))
                 ActiveEnemyProjectiles.Add(this);
         }
+
+        PlayFireSFX();
     }
 
     private void OnDisable()
@@ -58,12 +80,12 @@ public class ProjectileLogic : MonoBehaviour
         {
             ActiveEnemyProjectiles.Remove(this);
         }
+
         SpawnHitVFX();
     }
 
     private void Update()
     {
-        // Pure 2D vector movement without physics[cite: 18, 19]
         if (direction != Vector2.zero)
         {
             Vector2 currentPos = transform.position;
@@ -74,7 +96,7 @@ public class ProjectileLogic : MonoBehaviour
         currentLifetime += Time.deltaTime;
         if (currentLifetime >= maxLifetime)
         {
-            Despawn();
+            Despawn(false);
         }
     }
 
@@ -86,9 +108,6 @@ public class ProjectileLogic : MonoBehaviour
         damage = damageValue;
     }
 
-    /// <summary>
-    /// Spawns the hit VFX at the impact location before recycling/despawning the projectile.
-    /// </summary>
     public void SpawnHitVFX()
     {
         if (hitVfxPrefab != null)
@@ -97,7 +116,17 @@ public class ProjectileLogic : MonoBehaviour
         }
     }
 
-    public void Despawn()
+    private void PlayFireSFX()
+    {
+        if (projectileFireSFX == null) return;
+
+        if (fireAudioSource != null)
+        {
+            fireAudioSource.PlayOneShot(projectileFireSFX);
+        }
+    }
+
+    public void Despawn(bool hitTarget = true)
     {
         gameObject.SetActive(false);
     }
