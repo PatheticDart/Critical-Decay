@@ -115,7 +115,10 @@ MonoBehaviour:
   maxHealth: 50
   hitRadius: 0.5
   currentLevel: 1
-  explosionPrefab: {fileID: 0}
+  explosionPrefab: {fileID: 2261501778384963346, guid: a907cc285433bd24092f81633317d133, type: 3}
+  currentHealth: 0
+  deathSFX: {fileID: 0}
+  deathSFXVolume: 1
 --- !u!114 &2760433290478766678
 MonoBehaviour:
   m_ObjectHideFlags: 0

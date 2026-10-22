@@ -7,10 +7,13 @@ public class GameManager : MonoBehaviour
 
     [Header("UI Panels")]
     [SerializeField] private GameObject gameOverPanel;
+    [SerializeField] private GameObject gameWinPanel;
 
     private bool isGameOver = false;
+    private bool isGameWin = false;
 
     public bool IsGameOver => isGameOver;
+    public bool IsGameWin => isGameWin;
 
     private void Awake()
     {
@@ -37,6 +40,19 @@ public class GameManager : MonoBehaviour
         Time.timeScale = 0f;
     }
 
+    public void GameWin()
+    {
+        if (isGameWin) return;
+        isGameWin = true;
+
+        if (gameWinPanel != null)
+        {
+            gameWinPanel.SetActive(true);
+        }
+
+        Time.timeScale = 0f;
+    }
+
     public void StartGame()
     {
         SceneManager.LoadScene(1);
@@ -57,5 +73,21 @@ public class GameManager : MonoBehaviour
     public void QuitGame()
     {
         Application.Quit();
+    }
+
+    public void StartNormalMode()
+    {
+        PlayerPrefs.SetInt("IsEndlessMode", 0);
+        PlayerPrefs.Save();
+        Time.timeScale = 1f;
+        SceneManager.LoadScene("Main Scene");
+    }
+
+    public void StartEndlessMode()
+    {
+        PlayerPrefs.SetInt("IsEndlessMode", 1);
+        PlayerPrefs.Save();
+        Time.timeScale = 1f;
+        SceneManager.LoadScene("Main Scene");
     }
 }

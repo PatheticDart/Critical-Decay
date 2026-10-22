@@ -3,8 +3,9 @@ using UnityEngine.SceneManagement;
 
 public class PauseMenu : MonoBehaviour
 {
-    [Header("UI Reference")]
+    [Header("UI References")]
     [SerializeField] private GameObject pauseMenuPanel;
+    [SerializeField] private GameObject optionsMenuPanel;
 
     private bool isPaused = false;
 
@@ -16,6 +17,11 @@ public class PauseMenu : MonoBehaviour
         {
             pauseMenuPanel.SetActive(false);
         }
+
+        if (optionsMenuPanel != null)
+        {
+            optionsMenuPanel.SetActive(false);
+        }
     }
 
     private void Update()
@@ -24,10 +30,17 @@ public class PauseMenu : MonoBehaviour
         {
             if (GameManager.Instance != null && GameManager.Instance.IsGameOver) return;
 
-            if (isPaused)
+            // 1. If Options Sub-Menu is active, close it and return to Pause Menu
+            if (optionsMenuPanel != null && optionsMenuPanel.activeSelf)
+            {
+                CloseOptions();
+            }
+            // 2. If main Pause Menu is active, resume the game
+            else if (isPaused)
             {
                 Resume();
             }
+            // 3. Otherwise, open the Pause Menu
             else
             {
                 Pause();
@@ -44,6 +57,11 @@ public class PauseMenu : MonoBehaviour
             pauseMenuPanel.SetActive(true);
         }
 
+        if (optionsMenuPanel != null)
+        {
+            optionsMenuPanel.SetActive(false);
+        }
+
         Time.timeScale = 0f;
     }
 
@@ -56,6 +74,37 @@ public class PauseMenu : MonoBehaviour
             pauseMenuPanel.SetActive(false);
         }
 
+        if (optionsMenuPanel != null)
+        {
+            optionsMenuPanel.SetActive(false);
+        }
+
         Time.timeScale = 1f;
+    }
+
+    public void OpenOptions()
+    {
+        if (pauseMenuPanel != null)
+        {
+            pauseMenuPanel.SetActive(false);
+        }
+
+        if (optionsMenuPanel != null)
+        {
+            optionsMenuPanel.SetActive(true);
+        }
+    }
+
+    public void CloseOptions()
+    {
+        if (optionsMenuPanel != null)
+        {
+            optionsMenuPanel.SetActive(false);
+        }
+
+        if (pauseMenuPanel != null)
+        {
+            pauseMenuPanel.SetActive(true);
+        }
     }
 }

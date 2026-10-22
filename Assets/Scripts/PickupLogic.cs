@@ -13,6 +13,10 @@ public class PickupLogic : MonoBehaviour
     [SerializeField] private int amount = 1;
     [SerializeField] private float collectionRadius = 2.0f;
 
+    [Header("Audio Settings")]
+    [SerializeField] private AudioClip audioClip;
+    [SerializeField] private AudioSource audioSource;
+
     [Header("Fly-to-UI Animation Settings")]
     [SerializeField] private float flyDuration = 0.8f;
     [SerializeField] private RectTransform scrapUIRect;
@@ -34,6 +38,12 @@ public class PickupLogic : MonoBehaviour
     private void Start()
     {
         mainCamera = Camera.main;
+
+        if (audioSource == null)
+        {
+            audioSource = GetComponent<AudioSource>();
+        }
+
         FindPlayer();
         FindUIRefs();
     }
@@ -90,11 +100,31 @@ public class PickupLogic : MonoBehaviour
         isCollected = true;
         startWorldPos = transform.position;
 
+        PlayPickupSFX();
+
         Vector3 midPoint = startWorldPos + new Vector3(Random.Range(-1.0f, 1.0f), 1.5f, 0f);
         controlWorldPos = midPoint;
 
         flyElapsedTime = 0f;
         isFlying = true;
+    }
+
+    private void PlayPickupSFX()
+    {
+        if (audioClip == null) return;
+
+        if (audioSource != null)
+        {
+            audioSource.PlayOneShot(audioClip);
+        }
+        else if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayUIClick(1, audioClip);
+        }
+        else
+        {
+            AudioSource.PlayClipAtPoint(audioClip, transform.position);
+        }
     }
 
     private void AnimateFlyToUI()
@@ -151,10 +181,13 @@ public class PickupLogic : MonoBehaviour
         Destroy(gameObject);
     }
 
-    public void Initialize(PickupType pickupType, int dropAmount)
+    public void Initialize(PickupType pickupType, int dropAmount = -1)
     {
         type = pickupType;
-        amount = dropAmount;
+        if (dropAmount > 0)
+        {
+            amount = dropAmount;
+        }
     }
 
     private void OnDrawGizmosSelected()

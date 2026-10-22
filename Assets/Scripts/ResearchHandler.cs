@@ -10,6 +10,8 @@ public class ResearchHandler : MonoBehaviour
     public bool unlockedBoltAcquisition = false;
     public bool unlockedWorkshopKnowledge = false;
     public bool unlockedCombatOutfit = false;
+    public bool unlockedImprovedRefining = false;
+    public bool unlockedEfficientRefining = false;
 
     private void Awake()
     {
@@ -69,6 +71,26 @@ public class ResearchHandler : MonoBehaviour
                     return true;
                 }
                 break;
+
+            case "ImprovedRefining":
+                if (!unlockedImprovedRefining && res.ConsumeResearchSamples(40))
+                {
+                    unlockedImprovedRefining = true;
+                    res.SetScrapPerConversion(2);
+                    OnTechUnlocked();
+                    return true;
+                }
+                break;
+
+            case "EfficientRefining":
+                if (unlockedImprovedRefining && !unlockedEfficientRefining && res.ConsumeResearchSamples(80))
+                {
+                    unlockedEfficientRefining = true;
+                    res.SetScrapPerConversion(1);
+                    OnTechUnlocked();
+                    return true;
+                }
+                break;
         }
 
         return false;
@@ -76,7 +98,7 @@ public class ResearchHandler : MonoBehaviour
 
     private void ApplyCombatOutfitToPlayer()
     {
-        PlayerController player = FindObjectOfType<PlayerController>();
+        PlayerController player = FindObjectOfType<PlayerController>(true);
         if (player != null)
         {
             player.UpgradeToCombatOutfit();

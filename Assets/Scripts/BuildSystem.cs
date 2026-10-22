@@ -352,4 +352,13 @@ public class BuildSystem : MonoBehaviour
             activeOptionNodeRects.Remove(gridPos);
         }
     }
+
+    public void CloseModuleShopPanel()
+    {
+        if (moduleSelectionPanel != null)
+        {
+            moduleSelectionPanel.SetActive(false);
+        }
+        selectedNode = null;
+    }
 }

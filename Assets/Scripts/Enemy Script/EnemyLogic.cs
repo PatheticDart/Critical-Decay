@@ -26,6 +26,7 @@ public class EnemyLogic : MonoBehaviour
     [Header("Audio SFX")]
     [SerializeField] private AudioClip deathSFX;
     [Range(0f, 1f)][SerializeField] private float deathSFXVolume = 1f;
+    [SerializeField] private EnemyHealthUI healthUI;
 
     private int currentHealth;
 
@@ -72,9 +73,13 @@ public class EnemyLogic : MonoBehaviour
     {
         currentHealth -= damageAmount;
 
+        if (healthUI != null)
+        {
+            healthUI.UpdateHealthBar(currentHealth, maxHealth);
+        }
+
         if (currentHealth <= 0)
         {
-            currentHealth = 0;
             Die();
         }
     }
@@ -109,7 +114,8 @@ public class EnemyLogic : MonoBehaviour
             PickupLogic pickup = scrapObj.GetComponent<PickupLogic>();
             if (pickup != null)
             {
-                pickup.Initialize(PickupType.Scrap, 1);
+                // Preserves the prefab's configured Inspector amount
+                pickup.Initialize(PickupType.Scrap, pickup.Amount);
             }
         }
 
@@ -143,6 +149,11 @@ public class EnemyLogic : MonoBehaviour
         currentHealth = maxHealth;
         if (!ActiveEnemies.Contains(this))
             ActiveEnemies.Add(this);
+
+        if (healthUI != null)
+        {
+            healthUI.UpdateHealthBar(currentHealth, maxHealth);
+        }
     }
 
     private void OnDisable()

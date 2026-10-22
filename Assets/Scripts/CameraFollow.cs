@@ -4,18 +4,29 @@ public class CameraFollow : MonoBehaviour
 {
     public Transform player;
 
+    private bool isFollowing = true;
+
     void Start()
     {
-        player = GameObject.FindGameObjectWithTag("Player").transform;
+        GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+        if (playerObj != null)
+        {
+            player = playerObj.transform;
+        }
     }
 
     void Update()
     {
-        if (player != null)
+        if (isFollowing && player != null)
         {
             Vector3 newPosition = player.position;
-            newPosition.z = transform.position.z; // Keep the camera's z position unchanged
+            newPosition.z = transform.position.z;
             transform.position = newPosition;
         }
+    }
+
+    public void SetFollowing(bool follow)
+    {
+        isFollowing = follow;
     }
 }

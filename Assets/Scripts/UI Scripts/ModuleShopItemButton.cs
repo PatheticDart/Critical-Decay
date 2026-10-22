@@ -22,10 +22,10 @@ public class ModuleShopItemButton : MonoBehaviour
         if (nameText != null) nameText.text = data.moduleName;
         if (costText != null)
         {
-            string currencyLabel = data.costType == CurrencyType.Scrap ? "Scrap" : "Bars";
-            costText.text = $"{data.buildCost} {currencyLabel}";
+            string currencyLabel = data.costType == CurrencyType.Scrap ? "Scrap" : " Metal Bars";
+            costText.text = $"Cost: {data.buildCost} {currencyLabel}";
         }
-        if (energyDrainText != null) energyDrainText.text = $"{data.energyDrain} Energy";
+        if (energyDrainText != null) energyDrainText.text = $"Energy Drain: {data.energyDrain}";
 
         bool isAlreadyBuilt = false;
         if (data.isRefinery)

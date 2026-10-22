@@ -9,23 +9,47 @@ public class ModuleActionPanel : MonoBehaviour
     [SerializeField] private TextMeshProUGUI healthText;
     [SerializeField] private TextMeshProUGUI repairCostText;
     [SerializeField] private TextMeshProUGUI upgradeCostText;
+    [SerializeField] private TextMeshProUGUI refineryStatusText;
 
     [Header("Action Buttons")]
     [SerializeField] private Button upgradeButton;
     [SerializeField] private Button repairButton;
     [SerializeField] private Button sellButton;
 
+    [Header("Refinery Toggle Buttons")]
+    [SerializeField] private Button startRefineryButton;
+    [SerializeField] private Button stopRefineryButton;
+
+    [Header("Upgrade Caps")]
+    [SerializeField] private int maxUpgradeLevel = 5;
+
     private ModuleHealth targetModule;
 
     public void OpenPanel(ModuleHealth module)
     {
+        if (targetModule != null)
+        {
+            targetModule.SetRangeIndicatorVisible(false);
+        }
+
         targetModule = module;
         gameObject.SetActive(true);
+
+        if (targetModule != null && targetModule.IsTurret)
+        {
+            targetModule.SetRangeIndicatorVisible(true);
+        }
+
         RefreshPanel();
     }
 
     public void ClosePanel()
     {
+        if (targetModule != null)
+        {
+            targetModule.SetRangeIndicatorVisible(false);
+        }
+
         targetModule = null;
         gameObject.SetActive(false);
     }
@@ -57,40 +81,76 @@ public class ModuleActionPanel : MonoBehaviour
         }
 
         ModuleScriptableObject moduleData = GetModuleData(targetModule.ModuleName);
-        bool canUpgrade = targetModule.IsTurret && moduleData != null;
-        int upgradeCost = 0;
-        string currencyLabel = "Bars";
+        bool canBeUpgradedType = (targetModule.IsTurret || targetModule.IsRefinery) && moduleData != null;
 
-        if (canUpgrade)
+        if (canBeUpgradedType)
         {
-            upgradeCost = targetModule.GetUpgradeCost(moduleData.buildCost);
-            currencyLabel = moduleData.costType == CurrencyType.Scrap ? "Scrap" : "Bars";
+            if (upgradeButton != null) upgradeButton.gameObject.SetActive(true);
 
-            bool hasResources = false;
-            if (ResourceHandler.Instance != null)
+            if (targetModule.CurrentLevel >= maxUpgradeLevel)
             {
-                hasResources = moduleData.costType == CurrencyType.Scrap
-                    ? ResourceHandler.Instance.Scrap >= upgradeCost
-                    : ResourceHandler.Instance.MetalBars >= upgradeCost;
+                if (upgradeButton != null) upgradeButton.interactable = false;
+                if (upgradeCostText != null) upgradeCostText.text = "Upgrade: MAX LEVEL";
             }
-
-            if (upgradeButton != null)
+            else
             {
-                upgradeButton.gameObject.SetActive(true);
-                upgradeButton.interactable = hasResources;
-                upgradeButton.onClick.RemoveAllListeners();
-                upgradeButton.onClick.AddListener(() => OnUpgradeClicked(moduleData.buildCost, moduleData.costType, upgradeCost));
-            }
+                int upgradeCost = targetModule.GetUpgradeCost(moduleData.buildCost);
+                string currencyLabel = moduleData.costType == CurrencyType.Scrap ? "Scrap" : "Bars";
 
-            if (upgradeCostText != null)
-            {
-                upgradeCostText.text = $"Upgrade: {upgradeCost} {currencyLabel}";
+                bool hasResources = false;
+                if (ResourceHandler.Instance != null)
+                {
+                    hasResources = moduleData.costType == CurrencyType.Scrap
+                        ? ResourceHandler.Instance.Scrap >= upgradeCost
+                        : ResourceHandler.Instance.MetalBars >= upgradeCost;
+                }
+
+                if (upgradeButton != null)
+                {
+                    upgradeButton.interactable = hasResources;
+                    upgradeButton.onClick.RemoveAllListeners();
+                    upgradeButton.onClick.AddListener(() => OnUpgradeClicked(moduleData.buildCost, moduleData.costType, upgradeCost));
+                }
+
+                if (upgradeCostText != null)
+                {
+                    upgradeCostText.text = $"Upgrade: {upgradeCost} {currencyLabel}";
+                }
             }
         }
         else
         {
             if (upgradeButton != null) upgradeButton.gameObject.SetActive(false);
             if (upgradeCostText != null) upgradeCostText.text = "";
+        }
+
+        bool isRefinery = targetModule.IsRefinery;
+        bool isRefineryRunning = ResourceHandler.Instance != null && ResourceHandler.Instance.IsRefineryActive;
+
+        if (refineryStatusText != null)
+        {
+            refineryStatusText.gameObject.SetActive(isRefinery);
+            if (isRefinery)
+            {
+                refineryStatusText.text = isRefineryRunning ? "Status: PROCESSING" : "Status: STOPPED";
+                refineryStatusText.color = isRefineryRunning ? Color.green : Color.red;
+            }
+        }
+
+        if (startRefineryButton != null)
+        {
+            startRefineryButton.gameObject.SetActive(isRefinery);
+            startRefineryButton.interactable = isRefinery && !isRefineryRunning;
+            startRefineryButton.onClick.RemoveAllListeners();
+            startRefineryButton.onClick.AddListener(OnStartRefineryClicked);
+        }
+
+        if (stopRefineryButton != null)
+        {
+            stopRefineryButton.gameObject.SetActive(isRefinery);
+            stopRefineryButton.interactable = isRefinery && isRefineryRunning;
+            stopRefineryButton.onClick.RemoveAllListeners();
+            stopRefineryButton.onClick.AddListener(OnStopRefineryClicked);
         }
 
         if (sellButton != null)
@@ -110,6 +170,36 @@ public class ModuleActionPanel : MonoBehaviour
         );
     }
 
+    private void OnStartRefineryClicked()
+    {
+        if (ResourceHandler.Instance != null)
+        {
+            ResourceHandler.Instance.SetRefineryActive(true);
+        }
+
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayUIClick(1);
+        }
+
+        RefreshPanel();
+    }
+
+    private void OnStopRefineryClicked()
+    {
+        if (ResourceHandler.Instance != null)
+        {
+            ResourceHandler.Instance.SetRefineryActive(false);
+        }
+
+        if (AudioManager.Instance != null)
+        {
+            AudioManager.Instance.PlayUIClick(1);
+        }
+
+        RefreshPanel();
+    }
+
     private void OnRepairClicked(int cost)
     {
         if (targetModule == null) return;
@@ -122,7 +212,7 @@ public class ModuleActionPanel : MonoBehaviour
 
     private void OnUpgradeClicked(int baseCost, CurrencyType costType, int calculatedCost)
     {
-        if (targetModule == null) return;
+        if (targetModule == null || targetModule.CurrentLevel >= maxUpgradeLevel) return;
 
         bool success = false;
         if (ResourceHandler.Instance != null)
@@ -145,6 +235,12 @@ public class ModuleActionPanel : MonoBehaviour
             }
 
             targetModule.UpgradeModule(baseCost, costType);
+
+            if (targetModule.IsRefinery && ResourceHandler.Instance != null)
+            {
+                ResourceHandler.Instance.UpdateRefinerySpeed(targetModule.CurrentLevel);
+            }
+
             RefreshPanel();
         }
     }

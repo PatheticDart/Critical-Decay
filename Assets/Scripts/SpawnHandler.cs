@@ -4,6 +4,10 @@ using UnityEngine;
 
 public class SpawnHandler : MonoBehaviour
 {
+    [Header("Game Mode Settings")]
+    [SerializeField] private bool isEndlessMode = false;
+    [SerializeField] private int maxCampaignWave = 10;
+
     [Header("Spawn Origin Settings")]
     [SerializeField] private Transform chuTransform;
     [SerializeField] private float spawnRadius = 30f;
@@ -36,6 +40,12 @@ public class SpawnHandler : MonoBehaviour
     public int CurrentWave => currentWave;
     public bool IsIntermission => isIntermission;
     public float CurrentIntermissionTimer => currentIntermissionTimer;
+    public bool IsEndlessMode => isEndlessMode;
+
+    private void Awake()
+    {
+        isEndlessMode = PlayerPrefs.GetInt("IsEndlessMode", 0) == 1;
+    }
 
     private void Start()
     {
@@ -74,9 +84,10 @@ public class SpawnHandler : MonoBehaviour
 
             isSpawningWave = false;
 
-            while (remainingWaveEnemies > 0 || EnemyLogic.ActiveEnemies.Count > 0)
+            // Wait until all spawned enemies are deactivated/destroyed
+            while (GetActiveEnemyCount() > 0)
             {
-                remainingWaveEnemies = EnemyLogic.ActiveEnemies.Count;
+                remainingWaveEnemies = GetActiveEnemyCount();
                 UpdateEnemiesLeftUI();
                 yield return new WaitForSeconds(0.2f);
             }
@@ -85,9 +96,53 @@ public class SpawnHandler : MonoBehaviour
             UpdateEnemiesLeftUI();
             yield return new WaitForSeconds(1.0f);
 
+            // Win Condition Check
+            if (!isEndlessMode && currentWave >= maxCampaignWave)
+            {
+                TriggerGameWin();
+                yield break;
+            }
+
             isIntermission = true;
             SetWaveHeader("INTERMISSION");
             yield return StartCoroutine(RunIntermissionCountdown(standardIntermissionTime));
+        }
+    }
+
+    private int GetActiveEnemyCount()
+    {
+        int count = 0;
+        for (int i = EnemyLogic.ActiveEnemies.Count - 1; i >= 0; i--)
+        {
+            if (EnemyLogic.ActiveEnemies[i] != null && EnemyLogic.ActiveEnemies[i].gameObject.activeInHierarchy)
+            {
+                count++;
+            }
+            else if (EnemyLogic.ActiveEnemies[i] == null)
+            {
+                EnemyLogic.ActiveEnemies.RemoveAt(i);
+            }
+        }
+        return count;
+    }
+
+    private void TriggerGameWin()
+    {
+        SetWaveHeader("VICTORY!");
+
+        if (timerText != null)
+        {
+            timerText.gameObject.SetActive(true);
+            timerText.text = "ALL WAVES CLEARED";
+        }
+
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.GameWin();
+        }
+        else
+        {
+            Debug.LogError("[SpawnHandler] GameManager.Instance is NULL! Ensure GameManager is present in the scene.");
         }
     }
 
@@ -141,7 +196,7 @@ public class SpawnHandler : MonoBehaviour
 
         while (spawnedCount < totalEnemies)
         {
-            if (EnemyLogic.ActiveEnemies.Count >= maxActiveEnemies)
+            if (GetActiveEnemyCount() >= maxActiveEnemies)
             {
                 yield return new WaitForSeconds(1.0f);
                 continue;
@@ -161,7 +216,7 @@ public class SpawnHandler : MonoBehaviour
 
             spawnedCount++;
 
-            remainingWaveEnemies = EnemyLogic.ActiveEnemies.Count + (totalEnemies - spawnedCount);
+            remainingWaveEnemies = GetActiveEnemyCount() + (totalEnemies - spawnedCount);
             UpdateEnemiesLeftUI();
 
             yield return new WaitForSeconds(spawnIntervalWithinWave);

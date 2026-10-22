@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 236c7f50e8f0df0449679b2c7b03a281, type: 3}
   m_Name: Junction
   m_EditorClassIdentifier: Assembly-CSharp::ModuleScriptableObject
-  moduleName: Refinery
+  moduleName: Junction
   modulePrefab: {fileID: 6557284239598924426, guid: 5c26dda287d04c94987b84bc461cdc96, type: 3}
   moduleIcon: {fileID: -1148323997539002729, guid: c35275138f09658448b0d1361835d917, type: 3}
   costType: 1

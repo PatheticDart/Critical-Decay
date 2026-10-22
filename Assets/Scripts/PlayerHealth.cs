@@ -24,6 +24,11 @@ public class PlayerHealth : MonoBehaviour
         currentHealth = maxHealth;
     }
 
+    private void Start()
+    {
+        NotifyHealthUI();
+    }
+
     private void Update()
     {
         CheckEnemyProjectilesMath();
@@ -59,7 +64,26 @@ public class PlayerHealth : MonoBehaviour
         if (currentHealth <= 0)
         {
             currentHealth = 0;
+            NotifyHealthUI();
             Die();
+        }
+        else
+        {
+            NotifyHealthUI();
+        }
+    }
+
+    public void Heal(int amount)
+    {
+        currentHealth = Mathf.Min(currentHealth + amount, maxHealth);
+        NotifyHealthUI();
+    }
+
+    private void NotifyHealthUI()
+    {
+        if (PlayerHealthUI.Instance != null)
+        {
+            PlayerHealthUI.Instance.UpdateHealthBar(currentHealth, maxHealth);
         }
     }
 

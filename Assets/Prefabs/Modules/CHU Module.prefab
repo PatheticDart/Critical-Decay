@@ -113,6 +113,8 @@ MonoBehaviour:
   dockingPromptUI: {fileID: 0}
   shipUI: {fileID: 0}
   buildUI: {fileID: 0}
+  shakeFrequency: 25
+  shakeMagnitude: 0.2
 --- !u!114 &4023097207924065054
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -130,8 +132,11 @@ MonoBehaviour:
   isRefinery: 0
   isObservatory: 0
   isTurret: 0
-  energyDrain: 10
+  energyDrain: 100
   maxHealth: 100
   hitRadius: 1.3
   currentLevel: 1
-  explosionPrefab: {fileID: 0}
+  explosionPrefab: {fileID: 5955140771949526234, guid: 4aa35f5e9c18b754d8ddb6bc22a72c88, type: 3}
+  currentHealth: 0
+  deathSFX: {fileID: 0}
+  deathSFXVolume: 1

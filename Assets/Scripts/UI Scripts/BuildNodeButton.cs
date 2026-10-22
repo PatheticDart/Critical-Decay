@@ -31,6 +31,17 @@ public class BuildNodeButton : MonoBehaviour
             AudioManager.Instance.PlayUIClick(2);
         }
 
+        ModuleActionPanel actionPanel = FindObjectOfType<ModuleActionPanel>(true);
+        if (actionPanel != null)
+        {
+            actionPanel.ClosePanel();
+        }
+
+        if (ResearchUIManager.Instance != null)
+        {
+            ResearchUIManager.Instance.CloseResearchPanel();
+        }
+
         if (buildSystem != null)
         {
             buildSystem.OnNodeClicked(this);

@@ -11,8 +11,10 @@ public class ResourceHandler : MonoBehaviour
     [SerializeField] private int researchSamples = 0;
 
     [Header("Refinery Processing Settings")]
-    [SerializeField] private float conversionRateSeconds = 1.0f;
+    [SerializeField] private float baseConversionRateSeconds = 1.0f;
     [SerializeField] private int scrapPerConversion = 3;
+    [SerializeField] private bool isRefineryActive = true;
+    [SerializeField] private GameObject refineryConversionVFX;
 
     [Header("Energy System")]
     [SerializeField] private int maxEnergyThreshold = 20;
@@ -54,17 +56,21 @@ public class ResourceHandler : MonoBehaviour
     private Vector3 origResearchScale = Vector3.one;
 
     private float nextConversionTime;
+    private float currentConversionRateSeconds;
 
     public int Scrap => scrap;
     public int MetalBars => metalBars;
     public int ResearchSamples => researchSamples;
     public int MaxEnergyThreshold => maxEnergyThreshold;
     public int CurrentEnergyDrain => currentEnergyDrain;
+    public bool IsRefineryActive => isRefineryActive;
 
     private void Awake()
     {
         if (Instance == null) Instance = this;
         else Destroy(gameObject);
+
+        currentConversionRateSeconds = baseConversionRateSeconds;
 
         if (scrapUIContainer != null) origScrapScale = scrapUIContainer.localScale;
         if (metalBarsUIContainer != null) origMetalScale = metalBarsUIContainer.localScale;
@@ -85,21 +91,38 @@ public class ResourceHandler : MonoBehaviour
         UpdateAnimationsAndText();
     }
 
+    public void SetRefineryActive(bool active)
+    {
+        isRefineryActive = active;
+    }
+
+    public void UpdateRefinerySpeed(int refineryLevel)
+    {
+        currentConversionRateSeconds = baseConversionRateSeconds * Mathf.Pow(0.80f, refineryLevel - 1);
+    }
+
     private void ProcessRefineryLogic()
     {
-        bool hasRefinery = ModuleHealth.ActivePlayerModules.Exists(m => m != null && m.IsRefinery);
+        if (!isRefineryActive) return;
 
-        if (hasRefinery && scrap >= scrapPerConversion)
+        ModuleHealth refineryModule = ModuleHealth.ActivePlayerModules.Find(m => m != null && m.IsRefinery && !m.IsDeactivated);
+
+        if (refineryModule != null && scrap >= scrapPerConversion)
         {
             if (Time.time >= nextConversionTime)
             {
-                nextConversionTime = Time.time + conversionRateSeconds;
+                nextConversionTime = Time.time + currentConversionRateSeconds;
 
                 scrap -= scrapPerConversion;
                 TriggerScrapAnimation();
 
                 metalBars += 1;
                 TriggerMetalBarsAnimation();
+
+                if (refineryConversionVFX != null)
+                {
+                    Instantiate(refineryConversionVFX, refineryModule.transform.position, Quaternion.identity);
+                }
             }
         }
     }
@@ -299,5 +322,10 @@ public class ResourceHandler : MonoBehaviour
     private float EaseOutQuad(float t)
     {
         return 1f - (1f - t) * (1f - t);
+    }
+
+    public void SetScrapPerConversion(int newScrapAmount)
+    {
+        scrapPerConversion = newScrapAmount;
     }
 }

@@ -56,7 +56,7 @@ public class ScrapSpawner : MonoBehaviour
                     PickupLogic pickup = scrapObj.GetComponent<PickupLogic>();
                     if (pickup != null)
                     {
-                        pickup.Initialize(PickupType.Scrap, 1);
+                        pickup.Initialize(PickupType.Scrap, pickup.Amount);
                     }
                 }
             }

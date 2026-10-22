@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -50,6 +51,14 @@ public class ModuleHealth : MonoBehaviour
         currentHealth = maxHealth;
     }
 
+    private void Start()
+    {
+        if (isCHUModule)
+        {
+            NotifyHealthUI();
+        }
+    }
+
     private void OnEnable()
     {
         if (!ActivePlayerModules.Contains(this))
@@ -60,6 +69,11 @@ public class ModuleHealth : MonoBehaviour
         if (ResourceHandler.Instance != null && !isCHUModule)
         {
             ResourceHandler.Instance.ModifyEnergyDrain(energyDrain);
+        }
+
+        if (isCHUModule)
+        {
+            NotifyHealthUI();
         }
     }
 
@@ -131,6 +145,10 @@ public class ModuleHealth : MonoBehaviour
     public void RepairModule()
     {
         currentHealth = maxHealth;
+        if (isCHUModule)
+        {
+            NotifyHealthUI();
+        }
     }
 
     public void UpgradeModule(int baseCost, CurrencyType costType)
@@ -152,6 +170,11 @@ public class ModuleHealth : MonoBehaviour
         {
             childTurret.UpgradeTurretStats(currentLevel);
         }
+
+        if (isCHUModule)
+        {
+            NotifyHealthUI();
+        }
     }
 
     public int GetUpgradeCost(int baseCost)
@@ -168,7 +191,20 @@ public class ModuleHealth : MonoBehaviour
         if (currentHealth <= 0)
         {
             currentHealth = 0;
+            if (isCHUModule) NotifyHealthUI();
             Die();
+        }
+        else
+        {
+            if (isCHUModule) NotifyHealthUI();
+        }
+    }
+
+    private void NotifyHealthUI()
+    {
+        if (isCHUModule && PlayerHealthUI.Instance != null)
+        {
+            PlayerHealthUI.Instance.UpdateHealthBar(currentHealth, maxHealth);
         }
     }
 
@@ -191,18 +227,7 @@ public class ModuleHealth : MonoBehaviour
 
         if (isCHUModule)
         {
-            if (GameManager.Instance != null)
-            {
-                GameManager.Instance.GameOver();
-            }
-
-            for (int i = ActivePlayerModules.Count - 1; i >= 0; i--)
-            {
-                if (ActivePlayerModules[i] != null)
-                {
-                    ActivePlayerModules[i].DieDirectly();
-                }
-            }
+            StartCoroutine(CHUDestructionRoutine());
         }
         else
         {
@@ -210,9 +235,55 @@ public class ModuleHealth : MonoBehaviour
             {
                 BuildSystem.Instance.OnModuleDestroyed(GridPosition, this);
             }
+            Destroy(gameObject);
+        }
+    }
+
+    private IEnumerator CHUDestructionRoutine()
+    {
+        Vector3 chuPosition = transform.position;
+
+        // Focus all active scene cameras on the CHU explosion site
+        FocusCamerasOnCHU(chuPosition);
+
+        // Hide sprite visuals while explosion plays
+        SpriteRenderer sr = GetComponent<SpriteRenderer>();
+        if (sr != null) sr.enabled = false;
+
+        // Destroy remaining player modules
+        for (int i = ActivePlayerModules.Count - 1; i >= 0; i--)
+        {
+            if (ActivePlayerModules[i] != null && ActivePlayerModules[i] != this)
+            {
+                ActivePlayerModules[i].DieDirectly();
+            }
+        }
+
+        yield return new WaitForSeconds(5.0f);
+
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.GameOver();
         }
 
         Destroy(gameObject);
+    }
+
+    private void FocusCamerasOnCHU(Vector3 targetPosition)
+    {
+        DockingLogic docking = FindObjectOfType<DockingLogic>(true);
+        if (docking != null)
+        {
+            docking.FocusActiveCameraOnPosition(targetPosition);
+        }
+        else
+        {
+            Camera mainCam = Camera.main;
+            if (mainCam != null)
+            {
+                mainCam.transform.position = new Vector3(targetPosition.x, targetPosition.y, mainCam.transform.position.z);
+            }
+        }
     }
 
     public void DieDirectly()
@@ -237,6 +308,14 @@ public class ModuleHealth : MonoBehaviour
         if (actionPanel != null)
         {
             actionPanel.OpenPanel(this);
+        }
+    }
+    public void SetRangeIndicatorVisible(bool visible)
+    {
+        LineRenderer lr = GetComponentInChildren<LineRenderer>(true);
+        if (lr != null && !isDeactivatedByEnergy)
+        {
+            lr.enabled = visible;
         }
     }
 }

@@ -13,17 +13,55 @@ public class PlayerShootLogic : MonoBehaviour
 
     private float nextFireTime;
     private Camera mainCam;
+    private bool isUpgraded = false;
+
+    private void Awake()
+    {
+        // Start disabled until explicitly enabled via UpgradeToCombatOutfit
+        enabled = false;
+    }
+
+    private void OnEnable()
+    {
+        if (isUpgraded)
+        {
+            InitializeMounts();
+        }
+    }
 
     private void Start()
+    {
+        if (isUpgraded)
+        {
+            InitializeMounts();
+        }
+    }
+
+    public void EnableCombatOutfit()
+    {
+        isUpgraded = true;
+        enabled = true;
+        InitializeMounts();
+    }
+
+    private void InitializeMounts()
     {
         mainCam = Camera.main;
 
         if (weaponMount == null)
         {
-            GameObject mountObj = new GameObject("WeaponMount");
-            mountObj.transform.SetParent(transform);
-            mountObj.transform.localPosition = Vector3.zero;
-            weaponMount = mountObj.transform;
+            Transform existingMount = transform.Find("WeaponMount");
+            if (existingMount != null)
+            {
+                weaponMount = existingMount;
+            }
+            else
+            {
+                GameObject mountObj = new GameObject("WeaponMount");
+                mountObj.transform.SetParent(transform);
+                mountObj.transform.localPosition = Vector3.zero;
+                weaponMount = mountObj.transform;
+            }
         }
 
         if (firePoint == null)
@@ -34,6 +72,13 @@ public class PlayerShootLogic : MonoBehaviour
 
     private void Update()
     {
+        if (!isUpgraded) return;
+
+        if (mainCam == null || !mainCam.gameObject.activeInHierarchy)
+        {
+            mainCam = Camera.main;
+        }
+
         AimGunAtMouse();
 
         if (Input.GetMouseButton(0) && Time.time >= nextFireTime)
