@@ -73,7 +73,14 @@ public class SpawnHandler : MonoBehaviour
             isIntermission = false;
             isSpawningWave = true;
 
-            SetWaveHeader($"WAVE {currentWave}");
+            if (isEndlessMode)
+            {
+                SetWaveHeader($"WAVE {currentWave}");
+            }
+            else
+            {
+                SetWaveHeader($"WAVE {currentWave} / {maxCampaignWave}");
+            }
 
             int totalEnemiesForWave = baseWaveEnemies + ((currentWave - 1) * enemyIncrementPerWave);
             remainingWaveEnemies = totalEnemiesForWave;
@@ -84,7 +91,6 @@ public class SpawnHandler : MonoBehaviour
 
             isSpawningWave = false;
 
-            // Wait until all spawned enemies are deactivated/destroyed
             while (GetActiveEnemyCount() > 0)
             {
                 remainingWaveEnemies = GetActiveEnemyCount();
@@ -96,7 +102,6 @@ public class SpawnHandler : MonoBehaviour
             UpdateEnemiesLeftUI();
             yield return new WaitForSeconds(1.0f);
 
-            // Win Condition Check
             if (!isEndlessMode && currentWave >= maxCampaignWave)
             {
                 TriggerGameWin();

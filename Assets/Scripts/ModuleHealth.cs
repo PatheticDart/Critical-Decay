@@ -244,15 +244,11 @@ public class ModuleHealth : MonoBehaviour
     private IEnumerator CHUDestructionRoutine()
     {
         Vector3 chuPosition = transform.position;
-
-        // Focus all active scene cameras on the CHU explosion site
         FocusCamerasOnCHU(chuPosition);
 
-        // Hide sprite visuals while explosion plays
         SpriteRenderer sr = GetComponent<SpriteRenderer>();
         if (sr != null) sr.enabled = false;
 
-        // Destroy remaining player modules
         for (int i = ActivePlayerModules.Count - 1; i >= 0; i--)
         {
             if (ActivePlayerModules[i] != null && ActivePlayerModules[i] != this)

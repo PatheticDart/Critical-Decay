@@ -47,7 +47,9 @@ public class DockingLogic : MonoBehaviour
 
         Vector3 difference = playerObject.transform.position - transform.position;
         float distanceToPlayer = difference.magnitude;
-        bool inRange = distanceToPlayer <= dockingRange;
+
+        bool isAllowedByTutorial = TutorialManager.Instance == null || TutorialManager.Instance.CanDock();
+        bool inRange = distanceToPlayer <= dockingRange && isAllowedByTutorial;
 
         if (!isDocked)
         {
@@ -94,7 +96,6 @@ public class DockingLogic : MonoBehaviour
         Vector3 startPos = camTransform.position;
         Vector3 centerPos = new Vector3(targetWorldPos.x, targetWorldPos.y, camTransform.position.z);
 
-        // Phase 1: Smooth Lerp to CHU Explosion Position
         float lerpDuration = 1.0f;
         float lerpTimer = 0f;
 
@@ -108,7 +109,6 @@ public class DockingLogic : MonoBehaviour
 
         camTransform.position = centerPos;
 
-        // Phase 2: Mathematical Screen Shake (Sin/Cos Oscillations over time)
         float totalShakeDuration = 4.0f;
         float shakeTimer = 0f;
 
@@ -116,11 +116,9 @@ public class DockingLogic : MonoBehaviour
         {
             shakeTimer += Time.deltaTime;
 
-            // Decay strength gradually as time passes
             float currentDamping = 1.0f - (shakeTimer / totalShakeDuration);
             float currentMagnitude = shakeMagnitude * currentDamping;
 
-            // Math-based offsets using trigonometric frequency formulas
             float offsetX = Mathf.Sin(shakeTimer * shakeFrequency) * currentMagnitude;
             float offsetY = Mathf.Cos(shakeTimer * shakeFrequency * 0.85f) * currentMagnitude;
 
@@ -136,7 +134,6 @@ public class DockingLogic : MonoBehaviour
     {
         isDocked = true;
 
-        //Tutorial stuff, delete when needed
         if (TutorialManager.Instance != null)
         {
             TutorialManager.Instance.ReportAction(TutorialObjectiveType.DockWithStation);
@@ -158,26 +155,22 @@ public class DockingLogic : MonoBehaviour
     {
         isDocked = false;
 
-        // 1. Close Module Action Panel
         ModuleActionPanel actionPanel = FindObjectOfType<ModuleActionPanel>(true);
         if (actionPanel != null)
         {
             actionPanel.ClosePanel();
         }
 
-        // 2. Close Research Panel
         if (ResearchUIManager.Instance != null)
         {
             ResearchUIManager.Instance.CloseResearchPanel();
         }
 
-        // 3. Close Module Shop Selection Panel
         if (BuildSystem.Instance != null)
         {
             BuildSystem.Instance.CloseModuleShopPanel();
         }
 
-        // Restore Player Ship
         if (playerObject != null)
         {
             playerObject.SetActive(true);

@@ -10,6 +10,8 @@ public enum TutorialObjectiveType
     PressSToMoveBack,
     PressADToTurn,
     PressSpaceToBrake,
+    ZoomInAndOut,
+    ZoomReset,
     CollectScrap,
     DockWithStation,
     BuildRefinery,
@@ -124,6 +126,12 @@ public class TutorialManager : MonoBehaviour
             case TutorialObjectiveType.PressSpaceToBrake:
                 if (Input.GetKey(KeyCode.Space)) CompleteCurrentObjective();
                 break;
+            case TutorialObjectiveType.ZoomInAndOut:
+                if (Input.GetAxis("Mouse ScrollWheel") != 0f || Input.GetKey(KeyCode.Minus) || Input.GetKey(KeyCode.KeypadMinus) || Input.GetKey(KeyCode.Equals) || Input.GetKey(KeyCode.KeypadPlus)) CompleteCurrentObjective();
+                break;
+            case TutorialObjectiveType.ZoomReset:
+                if (Input.GetKeyDown(KeyCode.Backspace) || Input.GetMouseButtonDown(2)) CompleteCurrentObjective();
+                break;
             case TutorialObjectiveType.CollectScrap:
                 if (ResourceHandler.Instance != null && ResourceHandler.Instance.LocalScrap >= 50)
                 {
@@ -166,7 +174,7 @@ public class TutorialManager : MonoBehaviour
 
         currentStepIndex++;
 
-        if (completedObjective == TutorialObjectiveType.PressSpaceToBrake)
+        if (completedObjective == TutorialObjectiveType.ZoomReset)
         {
             if (shipUI != null) shipUI.SetActive(true);
         }
@@ -180,7 +188,7 @@ public class TutorialManager : MonoBehaviour
         if (currentStepIndex >= tutorialSteps.Length)
         {
             isTutorialComplete = true;
-            if (objectiveTextUI != null) objectiveTextUI.text = "Explore the game";
+            if (objectiveTextUI != null) objectiveTextUI.text = "Tutorial Complete! Explore and enjoy the game.";
             StartCoroutine(TurnOffTutorialUIPanelAfterDelay());
             return;
         }
@@ -193,7 +201,14 @@ public class TutorialManager : MonoBehaviour
 
     private IEnumerator TurnOffTutorialUIPanelAfterDelay()
     {
-        yield return new WaitForSeconds(transitionDuration);
+        yield return new WaitForSeconds(10);
         if (tutorialUIPanel != null) tutorialUIPanel.SetActive(false);
+    }
+
+    public bool CanDock()
+    {
+        if (!hasTutorialActive || isTutorialComplete) return true;
+
+        return currentStepIndex > 6;
     }
 }

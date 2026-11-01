@@ -81,11 +81,11 @@ public class CameraController : MonoBehaviour
     {
         if (pixelPerfectCamera == null) return;
 
-        if (Input.GetKey(KeyCode.Minus) || Input.GetKey(KeyCode.KeypadPlus))
+        if (Input.GetKey(KeyCode.Minus) || Input.GetKey(KeyCode.KeypadMinus))
         {
             targetPPU -= zoomSpeed * Time.deltaTime;
         }
-        else if (Input.GetKey(KeyCode.Equals) || Input.GetKey(KeyCode.KeypadMinus))
+        else if (Input.GetKey(KeyCode.Equals) || Input.GetKey(KeyCode.KeypadPlus))
         {
             targetPPU += zoomSpeed * Time.deltaTime;
         }

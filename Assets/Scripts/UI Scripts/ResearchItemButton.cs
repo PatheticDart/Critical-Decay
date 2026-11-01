@@ -88,6 +88,7 @@ public class ResearchItemButton : MonoBehaviour
             case "CombatOutfit": return ResourceHandler.Instance.MetalBars >= 100;
             case "ImprovedRefining": return ResourceHandler.Instance.ResearchSamples >= 40;
             case "EfficientRefining": return ResourceHandler.Instance.ResearchSamples >= 80;
+            case "CollectorDrones": return ResourceHandler.Instance.ResearchSamples >= 50;
             default: return true;
         }
     }

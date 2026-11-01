@@ -113,10 +113,10 @@ public class PlayerController : MonoBehaviour
         float vIn = Input.GetAxisRaw("Vertical");
         bool isBraking = Input.GetKey(KeyCode.Space);
 
-        bool isMovingForward = vIn > 0.1f;
+        bool isMovingForward = vIn > 0.1f || isBraking;
         bool isMovingReverse = vIn < -0.1f || isBraking;
-        bool isTurningLeft = xIn < -0.25f;
-        bool isTurningRight = xIn > 0.25f;
+        bool isTurningLeft = xIn < -0.25f || isBraking;
+        bool isTurningRight = xIn > 0.25f || isBraking;
 
         ToggleParticleArray(forwardThrusterParticles, isMovingForward);
         ToggleParticleArray(reverseThrusterParticles, isMovingReverse);

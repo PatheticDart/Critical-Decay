@@ -114,7 +114,6 @@ public class EnemyLogic : MonoBehaviour
             PickupLogic pickup = scrapObj.GetComponent<PickupLogic>();
             if (pickup != null)
             {
-                // Preserves the prefab's configured Inspector amount
                 pickup.Initialize(PickupType.Scrap, pickup.Amount);
             }
         }

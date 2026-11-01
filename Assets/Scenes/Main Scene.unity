@@ -13374,7 +13374,7 @@ MonoBehaviour:
   defaultPPU: 64
   zoomSpeed: 100
   scrollZoomMultiplier: 30
-  minPPU: 16
+  minPPU: 48
   maxPPU: 256
   zoomLerpSpeed: 8
   moveSpeed: 15
@@ -16230,29 +16230,37 @@ MonoBehaviour:
   - objectiveType: 4
     objectiveText: Press "Space" to brake
   - objectiveType: 5
+    objectiveText: 'Press and hold "+" or "-" to change the camera''s zoom.
+
+      (Alternatively, you can use the mouse scroll wheel.)'
+  - objectiveType: 6
+    objectiveText: 'Press "Backspace" or "Middle Mouse" to reset the zoom
+
+      (Pressing these will also reset camera position in build view.)'
+  - objectiveType: 7
     objectiveText: 'Collect 50 Scrap
 
       (These are the floating orange items)'
-  - objectiveType: 6
+  - objectiveType: 8
     objectiveText: 'Dock with the CHU
 
       (Go to the center and press "E". Docking lets you deposit your collected resources to the CHU)'
-  - objectiveType: 7
+  - objectiveType: 9
     objectiveText: 'Build a Refinery
 
-      (Click on "+" to build, the refinery will let you convert scrap into metal bars)'
-  - objectiveType: 8
+      (Click on "+" to build, the refinery will let you convert scrap into metal bars. You can use WASD to move the camera in build view.)'
+  - objectiveType: 10
     objectiveText: 'Build a Scrap Turret
 
       (You will need defenses to protect your base. Each module will add to your current EN threshold. Going over this will prevent future modules from being powered.)'
-  - objectiveType: 9
+  - objectiveType: 11
     objectiveText: 'Build an Observatory
 
       {Unlocks tech research)'
-  - objectiveType: 10
+  - objectiveType: 12
     objectiveText: 'Research Energy Production
 
-      (Unlocks Solar Panel modules, they can increase the EN threshold)'
+      (Unlocks Solar Panel modules, they can increase the EN threshold. Samples are dropped by enemy ships.)'
   transitionDuration: 2
   successColor: {r: 0, g: 1, b: 0, a: 1}
   defaultColor: {r: 1, g: 1, b: 1, a: 1}
@@ -25639,7 +25647,7 @@ ParticleSystemRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: -4
   m_MaskInteraction: 0
   m_RenderMode: 0
   m_MeshDistribution: 0
