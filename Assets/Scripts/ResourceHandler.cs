@@ -5,6 +5,10 @@ public class ResourceHandler : MonoBehaviour
 {
     public static ResourceHandler Instance { get; private set; }
 
+    [Header("Player Ship Resources")]
+    [SerializeField] private int localScrap = 0;
+    [SerializeField] private int localResearchSamples = 0;
+
     [Header("Resources (Data Values)")]
     [SerializeField] private int scrap = 0;
     [SerializeField] private int metalBars = 0;
@@ -21,12 +25,16 @@ public class ResourceHandler : MonoBehaviour
     [SerializeField] private int currentEnergyDrain = 0;
 
     [Header("UI Text References")]
+    [SerializeField] private TextMeshProUGUI localScrapText;
+    [SerializeField] private TextMeshProUGUI localResearchText;
     [SerializeField] private TextMeshProUGUI scrapText;
     [SerializeField] private TextMeshProUGUI metalBarsText;
     [SerializeField] private TextMeshProUGUI researchSamplesText;
     [SerializeField] private TextMeshProUGUI energyThresholdText;
 
     [Header("UI Scale Punch Animation Containers")]
+    [SerializeField] private RectTransform localScrapUIContainer;
+    [SerializeField] private RectTransform localResearchUIContainer;
     [SerializeField] private RectTransform scrapUIContainer;
     [SerializeField] private RectTransform metalBarsUIContainer;
     [SerializeField] private RectTransform researchUIContainer;
@@ -36,21 +44,26 @@ public class ResourceHandler : MonoBehaviour
     [SerializeField] private Vector3 punchScaleTarget = new Vector3(1.3f, 1.3f, 1.3f);
     [SerializeField] private float counterDuration = 0.5f;
 
-    private int displayedScrap;
-    private int startScrap;
+    private int displayedLocalScrap, startLocalScrap;
+    private int displayedLocalResearch, startLocalResearch;
+    private int displayedScrap, startScrap;
+    private int displayedMetalBars, startMetalBars;
+    private int displayedResearch, startResearch;
 
-    private int displayedMetalBars;
-    private int startMetalBars;
-
-    private int displayedResearch;
-    private int startResearch;
-
+    private float localScrapCounterTime, localResearchCounterTime;
     private float scrapCounterTime, metalCounterTime, researchCounterTime;
+
+    private bool isLocalScrapCounting, isLocalResearchCounting;
     private bool isScrapCounting, isMetalCounting, isResearchCounting;
 
+    private float localScrapPunchTime, localResearchPunchTime;
     private float scrapPunchTime, metalPunchTime, researchPunchTime;
+
+    private bool isLocalScrapPunching, isLocalResearchPunching;
     private bool isScrapPunching, isMetalPunching, isResearchPunching;
 
+    private Vector3 origLocalScrapScale = Vector3.one;
+    private Vector3 origLocalResearchScale = Vector3.one;
     private Vector3 origScrapScale = Vector3.one;
     private Vector3 origMetalScale = Vector3.one;
     private Vector3 origResearchScale = Vector3.one;
@@ -58,6 +71,8 @@ public class ResourceHandler : MonoBehaviour
     private float nextConversionTime;
     private float currentConversionRateSeconds;
 
+    public int LocalScrap => localScrap;
+    public int LocalResearchSamples => localResearchSamples;
     public int Scrap => scrap;
     public int MetalBars => metalBars;
     public int ResearchSamples => researchSamples;
@@ -72,6 +87,8 @@ public class ResourceHandler : MonoBehaviour
 
         currentConversionRateSeconds = baseConversionRateSeconds;
 
+        if (localScrapUIContainer != null) origLocalScrapScale = localScrapUIContainer.localScale;
+        if (localResearchUIContainer != null) origLocalResearchScale = localResearchUIContainer.localScale;
         if (scrapUIContainer != null) origScrapScale = scrapUIContainer.localScale;
         if (metalBarsUIContainer != null) origMetalScale = metalBarsUIContainer.localScale;
         if (researchUIContainer != null) origResearchScale = researchUIContainer.localScale;
@@ -79,6 +96,8 @@ public class ResourceHandler : MonoBehaviour
 
     private void Start()
     {
+        displayedLocalScrap = localScrap;
+        displayedLocalResearch = localResearchSamples;
         displayedScrap = scrap;
         displayedMetalBars = metalBars;
         displayedResearch = researchSamples;
@@ -89,6 +108,25 @@ public class ResourceHandler : MonoBehaviour
     {
         ProcessRefineryLogic();
         UpdateAnimationsAndText();
+    }
+
+    public void DepositLocalResources()
+    {
+        if (localScrap <= 0 && localResearchSamples <= 0) return;
+
+        if (localScrap > 0)
+        {
+            AddScrap(localScrap);
+            localScrap = 0;
+            TriggerLocalScrapAnimation();
+        }
+
+        if (localResearchSamples > 0)
+        {
+            AddResearchSamples(localResearchSamples);
+            localResearchSamples = 0;
+            TriggerLocalResearchAnimation();
+        }
     }
 
     public void SetRefineryActive(bool active)
@@ -129,28 +167,49 @@ public class ResourceHandler : MonoBehaviour
 
     private void UpdateAnimationsAndText()
     {
+        if (isLocalScrapCounting)
+        {
+            localScrapCounterTime += Time.deltaTime;
+            float t = Mathf.Clamp01(localScrapCounterTime / counterDuration);
+            displayedLocalScrap = Mathf.RoundToInt(Mathf.Lerp(startLocalScrap, localScrap, EaseOutQuad(t)));
+            if (t >= 1f) { displayedLocalScrap = localScrap; isLocalScrapCounting = false; }
+        }
+        if (isLocalScrapPunching)
+        {
+            localScrapPunchTime += Time.deltaTime;
+            float t = Mathf.Clamp01(localScrapPunchTime / punchDuration);
+            if (localScrapUIContainer != null) localScrapUIContainer.localScale = Vector3.Lerp(origLocalScrapScale, punchScaleTarget, EaseOutElastic(t));
+            if (t >= 1f) { isLocalScrapPunching = false; if (localScrapUIContainer != null) localScrapUIContainer.localScale = origLocalScrapScale; }
+        }
+
+        if (isLocalResearchCounting)
+        {
+            localResearchCounterTime += Time.deltaTime;
+            float t = Mathf.Clamp01(localResearchCounterTime / counterDuration);
+            displayedLocalResearch = Mathf.RoundToInt(Mathf.Lerp(startLocalResearch, localResearchSamples, EaseOutQuad(t)));
+            if (t >= 1f) { displayedLocalResearch = localResearchSamples; isLocalResearchCounting = false; }
+        }
+        if (isLocalResearchPunching)
+        {
+            localResearchPunchTime += Time.deltaTime;
+            float t = Mathf.Clamp01(localResearchPunchTime / punchDuration);
+            if (localResearchUIContainer != null) localResearchUIContainer.localScale = Vector3.Lerp(origLocalResearchScale, punchScaleTarget, EaseOutElastic(t));
+            if (t >= 1f) { isLocalResearchPunching = false; if (localResearchUIContainer != null) localResearchUIContainer.localScale = origLocalResearchScale; }
+        }
+
         if (isScrapCounting)
         {
             scrapCounterTime += Time.deltaTime;
             float t = Mathf.Clamp01(scrapCounterTime / counterDuration);
             displayedScrap = Mathf.RoundToInt(Mathf.Lerp(startScrap, scrap, EaseOutQuad(t)));
-            if (t >= 1f)
-            {
-                displayedScrap = scrap;
-                isScrapCounting = false;
-            }
+            if (t >= 1f) { displayedScrap = scrap; isScrapCounting = false; }
         }
-
         if (isScrapPunching)
         {
             scrapPunchTime += Time.deltaTime;
             float t = Mathf.Clamp01(scrapPunchTime / punchDuration);
             if (scrapUIContainer != null) scrapUIContainer.localScale = Vector3.Lerp(origScrapScale, punchScaleTarget, EaseOutElastic(t));
-            if (t >= 1f)
-            {
-                isScrapPunching = false;
-                if (scrapUIContainer != null) scrapUIContainer.localScale = origScrapScale;
-            }
+            if (t >= 1f) { isScrapPunching = false; if (scrapUIContainer != null) scrapUIContainer.localScale = origScrapScale; }
         }
 
         if (isMetalCounting)
@@ -158,23 +217,14 @@ public class ResourceHandler : MonoBehaviour
             metalCounterTime += Time.deltaTime;
             float t = Mathf.Clamp01(metalCounterTime / counterDuration);
             displayedMetalBars = Mathf.RoundToInt(Mathf.Lerp(startMetalBars, metalBars, EaseOutQuad(t)));
-            if (t >= 1f)
-            {
-                displayedMetalBars = metalBars;
-                isMetalCounting = false;
-            }
+            if (t >= 1f) { displayedMetalBars = metalBars; isMetalCounting = false; }
         }
-
         if (isMetalPunching)
         {
             metalPunchTime += Time.deltaTime;
             float t = Mathf.Clamp01(metalPunchTime / punchDuration);
             if (metalBarsUIContainer != null) metalBarsUIContainer.localScale = Vector3.Lerp(origMetalScale, punchScaleTarget, EaseOutElastic(t));
-            if (t >= 1f)
-            {
-                isMetalPunching = false;
-                if (metalBarsUIContainer != null) metalBarsUIContainer.localScale = origMetalScale;
-            }
+            if (t >= 1f) { isMetalPunching = false; if (metalBarsUIContainer != null) metalBarsUIContainer.localScale = origMetalScale; }
         }
 
         if (isResearchCounting)
@@ -182,25 +232,18 @@ public class ResourceHandler : MonoBehaviour
             researchCounterTime += Time.deltaTime;
             float t = Mathf.Clamp01(researchCounterTime / counterDuration);
             displayedResearch = Mathf.RoundToInt(Mathf.Lerp(startResearch, researchSamples, EaseOutQuad(t)));
-            if (t >= 1f)
-            {
-                displayedResearch = researchSamples;
-                isResearchCounting = false;
-            }
+            if (t >= 1f) { displayedResearch = researchSamples; isResearchCounting = false; }
         }
-
         if (isResearchPunching)
         {
             researchPunchTime += Time.deltaTime;
             float t = Mathf.Clamp01(researchPunchTime / punchDuration);
             if (researchUIContainer != null) researchUIContainer.localScale = Vector3.Lerp(origResearchScale, punchScaleTarget, EaseOutElastic(t));
-            if (t >= 1f)
-            {
-                isResearchPunching = false;
-                if (researchUIContainer != null) researchUIContainer.localScale = origResearchScale;
-            }
+            if (t >= 1f) { isResearchPunching = false; if (researchUIContainer != null) researchUIContainer.localScale = origResearchScale; }
         }
 
+        if (localScrapText != null) localScrapText.text = displayedLocalScrap.ToString();
+        if (localResearchText != null) localResearchText.text = displayedLocalResearch.ToString();
         if (scrapText != null) scrapText.text = displayedScrap.ToString();
         if (metalBarsText != null) metalBarsText.text = displayedMetalBars.ToString();
         if (researchSamplesText != null) researchSamplesText.text = displayedResearch.ToString();
@@ -214,10 +257,24 @@ public class ResourceHandler : MonoBehaviour
 
     private void UpdateAllTextDirect()
     {
+        if (localScrapText != null) localScrapText.text = localScrap.ToString();
+        if (localResearchText != null) localResearchText.text = localResearchSamples.ToString();
         if (scrapText != null) scrapText.text = scrap.ToString();
         if (metalBarsText != null) metalBarsText.text = metalBars.ToString();
         if (researchSamplesText != null) researchSamplesText.text = researchSamples.ToString();
         if (energyThresholdText != null) energyThresholdText.text = $"{currentEnergyDrain} / {maxEnergyThreshold}";
+    }
+
+    public void AddLocalScrap(int amount)
+    {
+        localScrap += amount;
+        TriggerLocalScrapAnimation();
+    }
+
+    public void AddLocalResearchSamples(int amount)
+    {
+        localResearchSamples += amount;
+        TriggerLocalResearchAnimation();
     }
 
     public void AddScrap(int amount)
@@ -269,6 +326,26 @@ public class ResourceHandler : MonoBehaviour
             return true;
         }
         return false;
+    }
+
+    private void TriggerLocalScrapAnimation()
+    {
+        startLocalScrap = displayedLocalScrap;
+        localScrapCounterTime = 0f;
+        isLocalScrapCounting = true;
+
+        localScrapPunchTime = 0f;
+        isLocalScrapPunching = true;
+    }
+
+    private void TriggerLocalResearchAnimation()
+    {
+        startLocalResearch = displayedLocalResearch;
+        localResearchCounterTime = 0f;
+        isLocalResearchCounting = true;
+
+        localResearchPunchTime = 0f;
+        isLocalResearchPunching = true;
     }
 
     private void TriggerScrapAnimation()

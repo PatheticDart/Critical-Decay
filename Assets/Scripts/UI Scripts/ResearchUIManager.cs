@@ -74,7 +74,8 @@ public class ResearchUIManager : MonoBehaviour
         CreateResearchItem("WorkshopKnowledge", "Workshop Knowledge", "50 Samples", "Unlocks Turret Upgrading", r.unlockedWorkshopKnowledge);
         CreateResearchItem("CombatOutfit", "Combat Outfit", "100 Metal Bars", "Upgrades Player Ship with Mouse-Aimed Turret", r.unlockedCombatOutfit);
         CreateResearchItem("ImprovedRefining", "Improved Refining", "40 Samples", "Reduces Refinery conversion cost to 2 Scrap per Metal Bar", r.unlockedImprovedRefining);
-        CreateResearchItem("EfficientRefining", "Efficient Refining", "80 Samples", "Reduces Refinery conversion cost to 1 Scrap per Metal Bar (Requires Improved Refining)", r.unlockedEfficientRefining);
+        CreateResearchItem("EfficientRefining", "Efficient Refining", "80 Samples", "Reduces Refinery conversion cost to 1 Scrap per Metal Bar", r.unlockedEfficientRefining);
+        CreateResearchItem("CollectorDrones", "Collector Drones", "50 Samples", "Unlocks Collector Drone Hangar module", r.unlockedCollectorDrones);
     }
 
     private void CreateResearchItem(string key, string nameStr, string costStr, string detailsStr, bool isUnlocked)

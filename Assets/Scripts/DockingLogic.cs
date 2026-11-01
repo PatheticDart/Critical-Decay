@@ -68,10 +68,10 @@ public class DockingLogic : MonoBehaviour
         Camera mainCam = Camera.main;
         if (mainCam != null && mainCam.gameObject.activeInHierarchy)
         {
-            CameraFollow mainCamFollow = mainCam.GetComponent<CameraFollow>();
-            if (mainCamFollow != null)
+            CameraController mainCamController = mainCam.GetComponent<CameraController>();
+            if (mainCamController != null)
             {
-                mainCamFollow.SetFollowing(false);
+                mainCamController.SetFollowing(false);
             }
 
             StartCoroutine(SmoothCameraMoveAndShake(mainCam.transform, targetPosition));
@@ -79,10 +79,10 @@ public class DockingLogic : MonoBehaviour
 
         if (buildCamera != null && buildCamera.activeInHierarchy)
         {
-            CameraFollow buildCamFollow = buildCamera.GetComponent<CameraFollow>();
-            if (buildCamFollow != null)
+            CameraController buildCamController = buildCamera.GetComponent<CameraController>();
+            if (buildCamController != null)
             {
-                buildCamFollow.SetFollowing(false);
+                buildCamController.SetFollowing(false);
             }
 
             StartCoroutine(SmoothCameraMoveAndShake(buildCamera.transform, targetPosition));
@@ -135,6 +135,17 @@ public class DockingLogic : MonoBehaviour
     private void EnterBuildMode()
     {
         isDocked = true;
+
+        //Tutorial stuff, delete when needed
+        if (TutorialManager.Instance != null)
+        {
+            TutorialManager.Instance.ReportAction(TutorialObjectiveType.DockWithStation);
+        }
+
+        if (ResourceHandler.Instance != null)
+        {
+            ResourceHandler.Instance.DepositLocalResources();
+        }
 
         if (dockingPromptUI != null) dockingPromptUI.SetActive(false);
         if (playerObject != null) playerObject.SetActive(false);

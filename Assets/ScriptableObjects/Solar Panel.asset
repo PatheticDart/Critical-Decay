@@ -16,8 +16,13 @@ MonoBehaviour:
   modulePrefab: {fileID: 4389664301654901271, guid: 6ab47d5613bb9694c9ec45454cd49b51, type: 3}
   moduleIcon: {fileID: 656558314906694029, guid: 4858f8c14525d5f41ac30ec2b3b6a6a1, type: 3}
   costType: 1
-  buildCost: 20
+  buildCost: 40
   energyDrain: 0
+  description: 'Energy production
+
+    +25 En threshold
+
+    Health: 50'
   requiredTechKey: EnergyProduction
   isRefinery: 0
   isObservatory: 0

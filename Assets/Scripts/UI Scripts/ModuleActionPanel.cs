@@ -10,18 +10,21 @@ public class ModuleActionPanel : MonoBehaviour
     [SerializeField] private TextMeshProUGUI repairCostText;
     [SerializeField] private TextMeshProUGUI upgradeCostText;
     [SerializeField] private TextMeshProUGUI refineryStatusText;
+    [SerializeField] private TextMeshProUGUI hangarStatusText;
 
     [Header("Action Buttons")]
     [SerializeField] private Button upgradeButton;
     [SerializeField] private Button repairButton;
     [SerializeField] private Button sellButton;
 
-    [Header("Refinery Toggle Buttons")]
+    [Header("Toggle Buttons")]
     [SerializeField] private Button startRefineryButton;
     [SerializeField] private Button stopRefineryButton;
+    [SerializeField] private Button startHangarButton;
+    [SerializeField] private Button stopHangarButton;
 
     [Header("Upgrade Caps")]
-    [SerializeField] private int maxUpgradeLevel = 5;
+    [SerializeField] private int maxUpgradeLevel = 10;
 
     private ModuleHealth targetModule;
 
@@ -71,26 +74,38 @@ public class ModuleActionPanel : MonoBehaviour
         float maxRepairCost = 100f * (1f + (targetModule.CurrentLevel - 1) * 0.10f);
         int finalRepairCost = Mathf.CeilToInt(damagePercent * maxRepairCost);
 
-        if (repairCostText != null) repairCostText.text = $"Repair: {finalRepairCost} Scrap";
+        bool canAffordRepair = ResourceHandler.Instance != null && ResourceHandler.Instance.Scrap >= finalRepairCost;
+
+        if (repairCostText != null)
+        {
+            repairCostText.text = $"Repair: {finalRepairCost} Scrap";
+            repairCostText.color = canAffordRepair ? Color.white : Color.red;
+        }
 
         if (repairButton != null)
         {
-            repairButton.interactable = (missingHp > 0) && (ResourceHandler.Instance != null && ResourceHandler.Instance.Scrap >= finalRepairCost);
+            repairButton.interactable = (missingHp > 0) && canAffordRepair;
             repairButton.onClick.RemoveAllListeners();
             repairButton.onClick.AddListener(() => OnRepairClicked(finalRepairCost));
         }
 
         ModuleScriptableObject moduleData = GetModuleData(targetModule.ModuleName);
-        bool canBeUpgradedType = (targetModule.IsTurret || targetModule.IsRefinery) && moduleData != null;
+        bool canBeUpgradedType = (targetModule.IsTurret || targetModule.IsRefinery || targetModule.IsCollectorHangar) && moduleData != null;
 
         if (canBeUpgradedType)
         {
             if (upgradeButton != null) upgradeButton.gameObject.SetActive(true);
 
-            if (targetModule.CurrentLevel >= maxUpgradeLevel)
+            int currentMaxLevel = targetModule.IsCollectorHangar ? 4 : maxUpgradeLevel;
+
+            if (targetModule.CurrentLevel >= currentMaxLevel)
             {
                 if (upgradeButton != null) upgradeButton.interactable = false;
-                if (upgradeCostText != null) upgradeCostText.text = "Upgrade: MAX LEVEL";
+                if (upgradeCostText != null)
+                {
+                    upgradeCostText.text = "Upgrade: MAX LEVEL";
+                    upgradeCostText.color = Color.yellow;
+                }
             }
             else
             {
@@ -115,6 +130,7 @@ public class ModuleActionPanel : MonoBehaviour
                 if (upgradeCostText != null)
                 {
                     upgradeCostText.text = $"Upgrade: {upgradeCost} {currencyLabel}";
+                    upgradeCostText.color = hasResources ? Color.white : Color.red;
                 }
             }
         }
@@ -151,6 +167,36 @@ public class ModuleActionPanel : MonoBehaviour
             stopRefineryButton.interactable = isRefinery && isRefineryRunning;
             stopRefineryButton.onClick.RemoveAllListeners();
             stopRefineryButton.onClick.AddListener(OnStopRefineryClicked);
+        }
+
+        bool isHangar = targetModule.IsCollectorHangar;
+        CollectorDroneHangar hangarComp = targetModule.GetComponent<CollectorDroneHangar>();
+        bool isHangarRunning = hangarComp != null && hangarComp.IsHangarActive;
+
+        if (hangarStatusText != null)
+        {
+            hangarStatusText.gameObject.SetActive(isHangar);
+            if (isHangar)
+            {
+                hangarStatusText.text = isHangarRunning ? "Status: DEPLOYING" : "Status: RECALLING";
+                hangarStatusText.color = isHangarRunning ? Color.green : Color.yellow;
+            }
+        }
+
+        if (startHangarButton != null)
+        {
+            startHangarButton.gameObject.SetActive(isHangar);
+            startHangarButton.interactable = isHangar && !isHangarRunning;
+            startHangarButton.onClick.RemoveAllListeners();
+            startHangarButton.onClick.AddListener(() => { hangarComp?.SetHangarActive(true); RefreshPanel(); });
+        }
+
+        if (stopHangarButton != null)
+        {
+            stopHangarButton.gameObject.SetActive(isHangar);
+            stopHangarButton.interactable = isHangar && isHangarRunning;
+            stopHangarButton.onClick.RemoveAllListeners();
+            stopHangarButton.onClick.AddListener(() => { hangarComp?.SetHangarActive(false); RefreshPanel(); });
         }
 
         if (sellButton != null)
@@ -212,7 +258,8 @@ public class ModuleActionPanel : MonoBehaviour
 
     private void OnUpgradeClicked(int baseCost, CurrencyType costType, int calculatedCost)
     {
-        if (targetModule == null || targetModule.CurrentLevel >= maxUpgradeLevel) return;
+        int currentMaxLevel = targetModule.IsCollectorHangar ? 4 : maxUpgradeLevel;
+        if (targetModule == null || targetModule.CurrentLevel >= currentMaxLevel) return;
 
         bool success = false;
         if (ResourceHandler.Instance != null)

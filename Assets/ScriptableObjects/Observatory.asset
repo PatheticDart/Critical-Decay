@@ -18,6 +18,9 @@ MonoBehaviour:
   costType: 1
   buildCost: 50
   energyDrain: 20
+  description: 'Unlocks tech research
+
+    Health: 100'
   requiredTechKey: 
   isRefinery: 0
   isObservatory: 1

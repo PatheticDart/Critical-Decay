@@ -32,6 +32,7 @@ public class BuildSystem : MonoBehaviour
 
     private List<ModuleHealth> chronologicalModuleList = new List<ModuleHealth>();
     private BuildNodeButton selectedNode;
+    private CameraController buildCamController;
 
     public ModuleScriptableObject[] AllAvailableModules => allAvailableModules;
 
@@ -44,6 +45,8 @@ public class BuildSystem : MonoBehaviour
     private void Start()
     {
         if (buildCamera == null) buildCamera = Camera.main;
+        if (buildCamera != null) buildCamController = buildCamera.GetComponent<CameraController>();
+
         if (moduleSelectionPanel != null) moduleSelectionPanel.SetActive(false);
 
         InitializeCHU();
@@ -80,16 +83,26 @@ public class BuildSystem : MonoBehaviour
     {
         if (buildCamera == null || chuTransform == null) return;
 
+        float uiScale = 1f;
+        if (buildCamController != null && buildCamController.DefaultPPU > 0)
+        {
+            uiScale = (float)buildCamController.CurrentPPU / buildCamController.DefaultPPU;
+        }
+
+        Vector3 scaleVector = new Vector3(uiScale, uiScale, 1f);
+
         foreach (var pair in activeNodeRects)
         {
             Vector3 worldPos = chuTransform.position + new Vector3(pair.Key.x * tileSize, pair.Key.y * tileSize, 0f);
             pair.Value.position = buildCamera.WorldToScreenPoint(worldPos);
+            pair.Value.localScale = scaleVector;
         }
 
         foreach (var pair in activeOptionNodeRects)
         {
             Vector3 worldPos = chuTransform.position + new Vector3(pair.Key.x * tileSize, pair.Key.y * tileSize, 0f);
             pair.Value.position = buildCamera.WorldToScreenPoint(worldPos);
+            pair.Value.localScale = scaleVector;
         }
     }
 
@@ -123,6 +136,7 @@ public class BuildSystem : MonoBehaviour
                     case "EnergyProduction": isUnlocked = ResearchHandler.Instance.unlockedEnergyProduction; break;
                     case "MoltenMetal": isUnlocked = ResearchHandler.Instance.unlockedMoltenMetal; break;
                     case "BoltAcquisition": isUnlocked = ResearchHandler.Instance.unlockedBoltAcquisition; break;
+                    case "CollectorDrones": isUnlocked = ResearchHandler.Instance.unlockedCollectorDrones; break;
                 }
             }
 
@@ -153,6 +167,20 @@ public class BuildSystem : MonoBehaviour
 
         GameObject newModuleObj = Instantiate(moduleData.modulePrefab, worldPos, Quaternion.identity, chuTransform);
         ModuleHealth moduleHealth = newModuleObj.GetComponent<ModuleHealth>();
+
+        //Tutorial stuff, delete when needed
+        if (moduleData.isRefinery)
+        {
+            TutorialManager.Instance.ReportAction(TutorialObjectiveType.BuildRefinery);
+        }
+        else if (moduleData.moduleName == "Scrap Turret")
+        {
+            TutorialManager.Instance.ReportAction(TutorialObjectiveType.BuildScrapTurret);
+        }
+        else if (moduleData.isObservatory)
+        {
+            TutorialManager.Instance.ReportAction(TutorialObjectiveType.BuildObservatory);
+        }
 
         if (moduleHealth != null)
         {

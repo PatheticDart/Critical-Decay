@@ -17,10 +17,14 @@ public class PickupLogic : MonoBehaviour
     [SerializeField] private AudioClip audioClip;
     [SerializeField] private AudioSource audioSource;
 
-    [Header("Fly-to-UI Animation Settings")]
-    [SerializeField] private float flyDuration = 0.8f;
+    [Header("Fly-to-Player Animation Settings")]
+    [SerializeField] private float flyDuration = 0.5f;
+
+    /*
+    [Header("Fly-to-UI Animation Settings (DEPRECATED / PRESERVED)")]
     [SerializeField] private RectTransform scrapUIRect;
     [SerializeField] private RectTransform researchUIRect;
+    */
 
     public PickupType Type => type;
     public int Amount => amount;
@@ -45,7 +49,7 @@ public class PickupLogic : MonoBehaviour
         }
 
         FindPlayer();
-        FindUIRefs();
+        // FindUIRefs();
     }
 
     private void FindPlayer()
@@ -57,6 +61,7 @@ public class PickupLogic : MonoBehaviour
         }
     }
 
+    /*
     private void FindUIRefs()
     {
         if (scrapUIRect == null)
@@ -71,12 +76,14 @@ public class PickupLogic : MonoBehaviour
             if (researchObj != null) researchUIRect = researchObj.GetComponent<RectTransform>();
         }
     }
+    */
 
     private void Update()
     {
         if (isFlying)
         {
-            AnimateFlyToUI();
+            AnimateFlyToPlayer();
+            // AnimateFlyToUI();
             return;
         }
 
@@ -102,7 +109,7 @@ public class PickupLogic : MonoBehaviour
 
         PlayPickupSFX();
 
-        Vector3 midPoint = startWorldPos + new Vector3(Random.Range(-1.0f, 1.0f), 1.5f, 0f);
+        Vector3 midPoint = startWorldPos + new Vector3(Random.Range(-1.0f, 1.0f), 1.0f, 0f);
         controlWorldPos = midPoint;
 
         flyElapsedTime = 0f;
@@ -127,6 +134,55 @@ public class PickupLogic : MonoBehaviour
         }
     }
 
+    private void AnimateFlyToPlayer()
+    {
+        if (playerTransform == null)
+        {
+            FindPlayer();
+            if (playerTransform == null)
+            {
+                OnArrivedAtPlayer();
+                return;
+            }
+        }
+
+        flyElapsedTime += Time.deltaTime;
+        float t = Mathf.Clamp01(flyElapsedTime / flyDuration);
+        float easedT = t * t;
+
+        Vector3 targetWorldPos = playerTransform.position;
+
+        Vector3 m1 = Vector3.Lerp(startWorldPos, controlWorldPos, easedT);
+        Vector3 m2 = Vector3.Lerp(controlWorldPos, targetWorldPos, easedT);
+        transform.position = Vector3.Lerp(m1, m2, easedT);
+
+        transform.localScale = Vector3.Lerp(Vector3.one, Vector3.one * 0.2f, easedT);
+
+        if (t >= 1f)
+        {
+            isFlying = false;
+            OnArrivedAtPlayer();
+        }
+    }
+
+    private void OnArrivedAtPlayer()
+    {
+        if (ResourceHandler.Instance != null)
+        {
+            if (type == PickupType.Scrap)
+            {
+                ResourceHandler.Instance.AddLocalScrap(amount);
+            }
+            else if (type == PickupType.ResearchSample)
+            {
+                ResourceHandler.Instance.AddLocalResearchSamples(amount);
+            }
+        }
+
+        Destroy(gameObject);
+    }
+
+    /*
     private void AnimateFlyToUI()
     {
         flyElapsedTime += Time.deltaTime;
@@ -170,16 +226,17 @@ public class PickupLogic : MonoBehaviour
         {
             if (type == PickupType.Scrap)
             {
-                ResourceHandler.Instance.AddScrap(amount);
+                ResourceHandler.Instance.AddLocalScrap(amount);
             }
             else if (type == PickupType.ResearchSample)
             {
-                ResourceHandler.Instance.AddResearchSamples(amount);
+                ResourceHandler.Instance.AddLocalResearchSamples(amount);
             }
         }
 
         Destroy(gameObject);
     }
+    */
 
     public void Initialize(PickupType pickupType, int dropAmount = -1)
     {

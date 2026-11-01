@@ -26,21 +26,20 @@ public class PauseMenu : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.P))
         {
             if (GameManager.Instance != null && GameManager.Instance.IsGameOver) return;
 
-            // 1. If Options Sub-Menu is active, close it and return to Pause Menu
             if (optionsMenuPanel != null && optionsMenuPanel.activeSelf)
             {
                 CloseOptions();
             }
-            // 2. If main Pause Menu is active, resume the game
+            
             else if (isPaused)
             {
                 Resume();
             }
-            // 3. Otherwise, open the Pause Menu
+            
             else
             {
                 Pause();

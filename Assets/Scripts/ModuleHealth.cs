@@ -11,6 +11,7 @@ public class ModuleHealth : MonoBehaviour
     [SerializeField] private bool isCHUModule = false;
     [SerializeField] private bool isRefinery = false;
     [SerializeField] private bool isObservatory = false;
+    [SerializeField] private bool isCollectorHangar = false;
     [SerializeField] private bool isTurret = false;
 
     [Header("Energy Drain Stat")]
@@ -40,6 +41,7 @@ public class ModuleHealth : MonoBehaviour
     public bool IsCHUModule => isCHUModule;
     public bool IsRefinery => isRefinery;
     public bool IsObservatory => isObservatory;
+    public bool IsCollectorHangar => isCollectorHangar;
     public bool IsTurret => isTurret;
     public int EnergyDrain => energyDrain;
     public int CurrentLevel => currentLevel;

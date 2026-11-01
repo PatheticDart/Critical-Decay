@@ -18,6 +18,7 @@ MonoBehaviour:
   costType: 1
   buildCost: 10
   energyDrain: 0
+  description: Connector node
   requiredTechKey: 
   isRefinery: 0
   isObservatory: 0

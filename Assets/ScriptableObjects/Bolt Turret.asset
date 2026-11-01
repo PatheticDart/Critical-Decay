@@ -18,6 +18,13 @@ MonoBehaviour:
   costType: 1
   buildCost: 20
   energyDrain: 20
+  description: 'Sniper turret
+
+    Dmg: 50 | Rng: 40 | ROF: 3
+
+    Health: 15 '
   requiredTechKey: BoltAcquisition
   isRefinery: 0
   isObservatory: 0
+  isCollectorHangar: 0
+  isTurret: 1

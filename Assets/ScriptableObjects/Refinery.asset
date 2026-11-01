@@ -18,6 +18,9 @@ MonoBehaviour:
   costType: 0
   buildCost: 10
   energyDrain: 10
+  description: 'Converts scrap into metal bars
+
+    Health: 100'
   requiredTechKey: 
   isRefinery: 1
   isObservatory: 0

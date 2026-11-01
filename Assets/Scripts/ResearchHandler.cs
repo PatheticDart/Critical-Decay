@@ -12,6 +12,7 @@ public class ResearchHandler : MonoBehaviour
     public bool unlockedCombatOutfit = false;
     public bool unlockedImprovedRefining = false;
     public bool unlockedEfficientRefining = false;
+    public bool unlockedCollectorDrones = false;
 
     private void Awake()
     {
@@ -31,6 +32,13 @@ public class ResearchHandler : MonoBehaviour
                 {
                     unlockedEnergyProduction = true;
                     OnTechUnlocked();
+
+                    //Tutorial stuff, delete when needed
+                    if (TutorialManager.Instance != null)
+                    {
+                        TutorialManager.Instance.ReportAction(TutorialObjectiveType.UnlockTech);
+                    }
+
                     return true;
                 }
                 break;
@@ -87,6 +95,15 @@ public class ResearchHandler : MonoBehaviour
                 {
                     unlockedEfficientRefining = true;
                     res.SetScrapPerConversion(1);
+                    OnTechUnlocked();
+                    return true;
+                }
+                break;
+
+            case "CollectorDrones":
+                if (!unlockedCollectorDrones && res.ConsumeResearchSamples(50))
+                {
+                    unlockedCollectorDrones = true;
                     OnTechUnlocked();
                     return true;
                 }

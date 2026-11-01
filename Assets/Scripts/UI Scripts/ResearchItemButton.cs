@@ -24,23 +24,42 @@ public class ResearchItemButton : MonoBehaviour
         if (detailsText != null) detailsText.text = detailsStr;
 
         bool isPrerequisiteMet = TruePrerequisiteMet(key);
+        bool canAfford = CheckAffordability(key);
+
+        if (costText != null)
+        {
+            costText.color = canAfford ? Color.white : Color.red;
+        }
 
         if (isUnlocked)
         {
-            if (statusText != null) statusText.text = "RESEARCHED";
+            if (statusText != null)
+            {
+                statusText.text = "RESEARCHED";
+                statusText.color = Color.green;
+            }
             if (buyButton != null) buyButton.interactable = false;
         }
         else if (!isPrerequisiteMet)
         {
-            if (statusText != null) statusText.text = "LOCKED (REQ: IMPROVED REFINING)";
+            if (statusText != null)
+            {
+                statusText.text = "LOCKED (REQ: IMPROVED REFINING)";
+                statusText.color = Color.red;
+            }
             if (buyButton != null) buyButton.interactable = false;
         }
         else
         {
-            if (statusText != null) statusText.text = "RESEARCH";
+            if (statusText != null)
+            {
+                statusText.text = "RESEARCH";
+                statusText.color = Color.white;
+            }
+
             if (buyButton != null)
             {
-                buyButton.interactable = true;
+                buyButton.interactable = canAfford;
                 buyButton.onClick.RemoveAllListeners();
                 buyButton.onClick.AddListener(OnBuyClicked);
             }
@@ -54,6 +73,23 @@ public class ResearchItemButton : MonoBehaviour
             return ResearchHandler.Instance != null && ResearchHandler.Instance.unlockedImprovedRefining;
         }
         return true;
+    }
+
+    private bool CheckAffordability(string key)
+    {
+        if (ResourceHandler.Instance == null) return false;
+
+        switch (key)
+        {
+            case "EnergyProduction": return ResourceHandler.Instance.ResearchSamples >= 5;
+            case "MoltenMetal": return ResourceHandler.Instance.ResearchSamples >= 10;
+            case "BoltAcquisition": return ResourceHandler.Instance.ResearchSamples >= 20;
+            case "WorkshopKnowledge": return ResourceHandler.Instance.ResearchSamples >= 50;
+            case "CombatOutfit": return ResourceHandler.Instance.MetalBars >= 100;
+            case "ImprovedRefining": return ResourceHandler.Instance.ResearchSamples >= 40;
+            case "EfficientRefining": return ResourceHandler.Instance.ResearchSamples >= 80;
+            default: return true;
+        }
     }
 
     private void OnBuyClicked()

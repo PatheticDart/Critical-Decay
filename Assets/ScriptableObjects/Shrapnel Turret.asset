@@ -18,6 +18,13 @@ MonoBehaviour:
   costType: 1
   buildCost: 15
   energyDrain: 10
+  description: 'Shotgun turret, short range
+
+    Dmg: 25 | Rng: 6 | ROF: 1
+
+    Health: 50 '
   requiredTechKey: MoltenMetal
   isRefinery: 0
   isObservatory: 0
+  isCollectorHangar: 0
+  isTurret: 1

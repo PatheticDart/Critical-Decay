@@ -79,13 +79,25 @@ public class GameManager : MonoBehaviour
     {
         PlayerPrefs.SetInt("IsEndlessMode", 0);
         PlayerPrefs.Save();
-        Time.timeScale = 1f;
-        SceneManager.LoadScene("Main Scene");
     }
 
     public void StartEndlessMode()
     {
         PlayerPrefs.SetInt("IsEndlessMode", 1);
+        PlayerPrefs.Save();
+    }
+
+    public void StartGameWithTutorial()
+    {
+        PlayerPrefs.SetInt("HasTutorial", 1);
+        PlayerPrefs.Save();
+        Time.timeScale = 1f;
+        SceneManager.LoadScene("Main Scene");
+    }
+
+    public void StartGameWithoutTutorial()
+    {
+        PlayerPrefs.SetInt("HasTutorial", 0);
         PlayerPrefs.Save();
         Time.timeScale = 1f;
         SceneManager.LoadScene("Main Scene");

@@ -18,6 +18,13 @@ MonoBehaviour:
   costType: 1
   buildCost: 10
   energyDrain: 5
+  description: 'A basic turret
+
+    Dmg: 10 | Rng: 10 | ROF: 0,2
+
+    Health: 30 '
   requiredTechKey: 
   isRefinery: 0
   isObservatory: 0
+  isCollectorHangar: 0
+  isTurret: 1
